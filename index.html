@@ -1,0 +1,2953 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Agenda Beauty - Gestão de Atendimento</title>
+    
+    <!-- Google Fonts: Plus Jakarta Sans (UI) & Playfair Display (Headers) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400..900;1,400..900&family=Plus+Jakarta+Sans:ital,wght@0,200..800;1,200..800&display=swap" rel="stylesheet">
+
+    <style>
+        /* =================================================================
+           1. DESIGN SYSTEM & VARIÁVEIS (Aesthetic Rose Gold & Cream)
+           ================================================================= */
+        :root {
+            /* Cores de Fundo e Contorno */
+            --bg-cream: #FCFAF9;
+            --bg-card: #FFFFFF;
+            --bg-accent-soft: #F6ECE9;
+            --border-soft: #EFE6E2;
+            --border-focus: #C58B7E;
+            
+            /* Tons de Destaque (Rose Gold e Cores de Status) */
+            --rose-gold: #C58B7E;
+            --rose-gold-dark: #A66C60;
+            --rose-gold-light: #ECCBC5;
+            --text-cocoa: #3A2F2D;
+            --text-muted: #8E7D7A;
+            
+            /* Statuses */
+            --status-agendado-bg: #FCECE9;
+            --status-agendado-txt: #A64B3D;
+            --status-concluido-bg: #E2F5EC;
+            --status-concluido-txt: #1B6A47;
+            --status-cancelado-bg: #FBE8E8;
+            --status-cancelado-txt: #9C2A2A;
+
+            /* Tipografia */
+            --font-ui: 'Plus Jakarta Sans', sans-serif;
+            --font-display: 'Playfair Display', serif;
+            
+            /* Sombras e Efeitos */
+            --shadow-sm: 0 4px 10px rgba(58, 47, 45, 0.03);
+            --shadow-md: 0 8px 20px rgba(58, 47, 45, 0.06);
+            --shadow-lg: 0 12px 30px rgba(58, 47, 45, 0.12);
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        /* Reset & Configs Globais */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: var(--font-ui);
+            background-color: var(--bg-cream);
+            color: var(--text-cocoa);
+            min-height: 100vh;
+            padding-bottom: 90px; /* Espaço para a barra de abas inferior */
+            line-height: 1.5;
+            overflow-x: hidden;
+        }
+
+        /* Container Principal */
+        .app-container {
+            max-width: 500px;
+            margin: 0 auto;
+            padding: 20px 16px;
+        }
+
+        /* =================================================================
+           2. TOAST SYSTEM (Notificações Flutuantes)
+           ================================================================= */
+        #toast-container {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 100000;
+            width: 90%;
+            max-width: 400px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            pointer-events: none;
+        }
+
+        .toast {
+            background: var(--bg-card);
+            padding: 14px 20px;
+            border-radius: 16px;
+            box-shadow: var(--shadow-lg);
+            font-weight: 600;
+            font-size: 13px;
+            color: var(--text-cocoa);
+            pointer-events: auto;
+            transform: translateY(-20px);
+            opacity: 0;
+            transition: var(--transition);
+            border-left: 5px solid var(--rose-gold);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .toast.show {
+            transform: translateY(0);
+            opacity: 1;
+        }
+
+        .toast.success { border-left-color: #25D366; }
+        .toast.error { border-left-color: #d32f2f; }
+        .toast.warning { border-left-color: #f1c40f; }
+
+        /* =================================================================
+           3. HEADER & STATS
+           ================================================================= */
+        header {
+            margin-bottom: 24px;
+            animation: fadeIn 0.6s ease;
+        }
+
+        .welcome-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+
+        .welcome-text h1 {
+            font-family: var(--font-display);
+            font-size: 26px;
+            font-weight: 700;
+            color: var(--text-cocoa);
+        }
+
+        .welcome-text p {
+            font-size: 13px;
+            color: var(--text-muted);
+        }
+
+        .avatar-circle {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--rose-gold-light) 0%, var(--rose-gold) 100%);
+            border: 2px solid #fff;
+            box-shadow: var(--shadow-sm);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+            font-weight: bold;
+            font-size: 16px;
+        }
+
+        /* Stats Cards (Grid 3 colunas) */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .stat-card {
+            background-color: var(--bg-card);
+            border-radius: 16px;
+            padding: 14px 10px;
+            border: 1px solid var(--border-soft);
+            box-shadow: var(--shadow-sm);
+            text-align: center;
+            transition: var(--transition);
+        }
+
+        .stat-card:hover {
+            transform: translateY(-2px);
+            border-color: var(--rose-gold-light);
+        }
+
+        .stat-label {
+            font-size: 10px;
+            text-transform: uppercase;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            color: var(--text-muted);
+            margin-bottom: 4px;
+            display: block;
+        }
+
+        .stat-value {
+            font-size: 16px;
+            font-weight: 800;
+            color: var(--rose-gold-dark);
+        }
+
+        /* =================================================================
+           4. DATE NAVIGATION SELECTOR
+           ================================================================= */
+        .date-navigation {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 20px;
+            background: var(--bg-card);
+            padding: 8px;
+            border-radius: 16px;
+            border: 1px solid var(--border-soft);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .date-slider {
+            display: flex;
+            gap: 6px;
+            overflow-x: auto;
+            flex-grow: 1;
+            scrollbar-width: none; /* Firefox */
+        }
+
+        .date-slider::-webkit-scrollbar {
+            display: none; /* Chrome/Safari */
+        }
+
+        .date-btn {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-width: 54px;
+            height: 60px;
+            border-radius: 12px;
+            border: 1px solid transparent;
+            background: transparent;
+            cursor: pointer;
+            transition: var(--transition);
+            flex-shrink: 0;
+        }
+
+        .date-btn span.day-lbl {
+            font-size: 10px;
+            font-weight: 700;
+            text-transform: uppercase;
+            color: var(--text-muted);
+        }
+
+        .date-btn span.day-num {
+            font-size: 16px;
+            font-weight: 800;
+            color: var(--text-cocoa);
+            margin-top: 2px;
+        }
+
+        .date-btn.active {
+            background-color: var(--rose-gold);
+            border-color: var(--rose-gold);
+        }
+
+        .date-btn.active span.day-lbl {
+            color: rgba(255, 255, 255, 0.85);
+        }
+
+        .date-btn.active span.day-num {
+            color: #FFFFFF;
+        }
+
+        .calendar-picker-btn {
+            width: 44px;
+            height: 44px;
+            border-radius: 12px;
+            border: 1px solid var(--border-soft);
+            background: var(--bg-accent-soft);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            color: var(--rose-gold-dark);
+            transition: var(--transition);
+            position: relative;
+        }
+
+        .calendar-picker-btn:hover {
+            background: var(--rose-gold-light);
+            color: var(--rose-gold-dark);
+        }
+
+        .calendar-picker-btn input[type="date"] {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0;
+            cursor: pointer;
+        }
+
+        /* =================================================================
+           5. APPOINTMENTS (TIMELINE CARD LIST)
+           ================================================================= */
+        .section-title-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        .section-title {
+            font-family: var(--font-display);
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--text-cocoa);
+        }
+
+        .appointment-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-top: 8px;
+        }
+
+        /* Card de Agendamento Estilo Premium */
+        .apt-card {
+            background-color: var(--bg-card);
+            border-radius: 20px;
+            padding: 16px;
+            border: 1px solid var(--border-soft);
+            box-shadow: var(--shadow-sm);
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            transition: var(--transition);
+            animation: slideIn 0.4s ease;
+            position: relative;
+        }
+
+        .apt-card:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+            border-color: var(--rose-gold-light);
+        }
+
+        /* Linha superior do card (Horário, Categoria e Status) */
+        .apt-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .apt-time {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-weight: 700;
+            font-size: 15px;
+            color: var(--rose-gold-dark);
+        }
+
+        .apt-status-badge {
+            font-size: 10px;
+            font-weight: 800;
+            padding: 4px 10px;
+            border-radius: 20px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            cursor: pointer;
+            position: relative;
+        }
+
+        /* Detalhes do Cliente e do Serviço */
+        .apt-body {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .apt-client-name {
+            font-weight: 700;
+            font-size: 16px;
+            color: var(--text-cocoa);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .apt-item-name {
+            font-size: 13px;
+            color: var(--text-muted);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .apt-notes {
+            font-size: 12px;
+            color: var(--text-muted);
+            font-style: italic;
+            background: #FDFBFA;
+            padding: 8px 12px;
+            border-radius: 8px;
+            border-left: 2px solid var(--rose-gold-light);
+            margin-top: 4px;
+        }
+
+        /* Linha inferior: preço e botões de ação rápida */
+        .apt-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-top: 1px dashed var(--border-soft);
+            padding-top: 12px;
+            margin-top: 4px;
+        }
+
+        .apt-price {
+            font-size: 15px;
+            font-weight: 800;
+            color: var(--text-cocoa);
+        }
+
+        .apt-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .action-btn {
+            width: 36px;
+            height: 36px;
+            border-radius: 10px;
+            border: 1px solid var(--border-soft);
+            background: transparent;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-muted);
+            transition: var(--transition);
+        }
+
+        .action-btn:hover {
+            border-color: var(--rose-gold);
+            color: var(--rose-gold-dark);
+            background: var(--bg-accent-soft);
+        }
+
+        .action-btn.whatsapp-btn {
+            background-color: #E2F5EC;
+            color: #1B6A47;
+            border-color: #C2EAD6;
+        }
+
+        .action-btn.whatsapp-btn:hover {
+            background-color: #25D366;
+            color: #FFFFFF;
+            border-color: #25D366;
+        }
+
+        /* =================================================================
+           6. CLIENTS VIEW
+           ================================================================= */
+        .search-box {
+            position: relative;
+            margin-bottom: 16px;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 12px 16px 12px 42px;
+            border-radius: 16px;
+            border: 1.5px solid var(--border-soft);
+            font-size: 14px;
+            background: var(--bg-card);
+            outline: none;
+            color: var(--text-cocoa);
+            transition: var(--transition);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .search-input:focus {
+            border-color: var(--rose-gold);
+            box-shadow: 0 0 0 3px rgba(197, 139, 126, 0.15);
+        }
+
+        .search-icon-svg {
+            position: absolute;
+            left: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-muted);
+            pointer-events: none;
+            width: 18px;
+            height: 18px;
+        }
+
+        /* Cartão de Cliente */
+        .client-card {
+            background: var(--bg-card);
+            border-radius: 20px;
+            border: 1px solid var(--border-soft);
+            padding: 16px;
+            margin-bottom: 12px;
+            box-shadow: var(--shadow-sm);
+            transition: var(--transition);
+        }
+
+        .client-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+        }
+
+        .client-info-main h3 {
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--text-cocoa);
+        }
+
+        .client-info-main p {
+            font-size: 12px;
+            color: var(--text-muted);
+            margin-top: 2px;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .client-actions {
+            display: flex;
+            gap: 6px;
+        }
+
+        .client-social-link {
+            font-size: 11px;
+            color: var(--rose-gold-dark);
+            text-decoration: none;
+            font-weight: 700;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            background: var(--bg-accent-soft);
+            padding: 4px 10px;
+            border-radius: 10px;
+            margin-top: 6px;
+            transition: var(--transition);
+        }
+
+        .client-social-link:hover {
+            background: var(--rose-gold-light);
+        }
+
+        /* Histórico Expandido do Cliente */
+        .client-history-toggle {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 12px;
+            font-weight: 700;
+            color: var(--text-muted);
+            cursor: pointer;
+            border-top: 1px solid var(--border-soft);
+            padding-top: 12px;
+            margin-top: 12px;
+            user-select: none;
+        }
+
+        .client-history-content {
+            display: none;
+            padding-top: 10px;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .client-history-content.active {
+            display: flex;
+        }
+
+        .hist-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 12px;
+            background: #FDFBFA;
+            padding: 8px 12px;
+            border-radius: 10px;
+            border-left: 3px solid var(--border-soft);
+        }
+
+        .hist-item.concluido {
+            border-left-color: var(--rose-gold);
+        }
+
+        /* =================================================================
+           7. SERVICES & PACKAGES VIEW
+           ================================================================= */
+        .view-toggle-tabs {
+            display: flex;
+            background: var(--bg-accent-soft);
+            padding: 4px;
+            border-radius: 14px;
+            margin-bottom: 16px;
+        }
+
+        .toggle-tab-btn {
+            flex: 1;
+            padding: 10px;
+            border: none;
+            border-radius: 10px;
+            font-size: 12px;
+            font-weight: 700;
+            cursor: pointer;
+            background: transparent;
+            color: var(--text-muted);
+            transition: var(--transition);
+        }
+
+        .toggle-tab-btn.active {
+            background: var(--bg-card);
+            color: var(--rose-gold-dark);
+            box-shadow: var(--shadow-sm);
+        }
+
+        /* Cartões de Serviço e Pacote */
+        .service-card, .package-card {
+            background: var(--bg-card);
+            border-radius: 18px;
+            border: 1px solid var(--border-soft);
+            padding: 16px;
+            margin-bottom: 12px;
+            box-shadow: var(--shadow-sm);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: var(--transition);
+        }
+
+        .service-card:hover, .package-card:hover {
+            border-color: var(--rose-gold-light);
+            box-shadow: var(--shadow-md);
+        }
+
+        .item-details h4 {
+            font-size: 15px;
+            font-weight: 700;
+            color: var(--text-cocoa);
+        }
+
+        .item-meta {
+            font-size: 11px;
+            color: var(--text-muted);
+            margin-top: 2px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .item-meta span {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .item-desc {
+            font-size: 12px;
+            color: var(--text-muted);
+            margin-top: 6px;
+            font-style: italic;
+        }
+
+        .item-price-action {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            gap: 8px;
+        }
+
+        .item-price-tag {
+            font-size: 16px;
+            font-weight: 800;
+            color: var(--rose-gold-dark);
+        }
+
+        /* =================================================================
+           8. MESSAGES VIEW (TEMPLATES CONFIG)
+           ================================================================= */
+        .message-editor-card {
+            background: var(--bg-card);
+            border-radius: 20px;
+            border: 1px solid var(--border-soft);
+            padding: 16px;
+            margin-bottom: 16px;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .message-editor-card h3 {
+            font-size: 15px;
+            font-weight: 700;
+            margin-bottom: 8px;
+            color: var(--text-cocoa);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .message-editor-card textarea {
+            width: 100%;
+            height: 110px;
+            border-radius: 12px;
+            border: 1.5px solid var(--border-soft);
+            padding: 12px;
+            font-family: inherit;
+            font-size: 13px;
+            outline: none;
+            resize: none;
+            color: var(--text-cocoa);
+            transition: var(--transition);
+        }
+
+        .message-editor-card textarea:focus {
+            border-color: var(--rose-gold);
+            box-shadow: 0 0 0 3px rgba(197, 139, 126, 0.15);
+        }
+
+        .message-tags-legend {
+            margin-top: 8px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+        }
+
+        .tag-pill {
+            font-size: 10px;
+            background: var(--bg-cream);
+            border: 1px solid var(--border-soft);
+            padding: 2px 8px;
+            border-radius: 6px;
+            color: var(--rose-gold-dark);
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .tag-pill:hover {
+            background: var(--rose-gold-light);
+            color: var(--rose-gold-dark);
+        }
+
+        /* =================================================================
+           9. FINANCIAL & CONFIGS VIEW
+           ================================================================= */
+        .financial-summary {
+            background: linear-gradient(135deg, var(--rose-gold) 0%, var(--rose-gold-dark) 100%);
+            border-radius: 24px;
+            padding: 24px;
+            color: white;
+            box-shadow: var(--shadow-lg);
+            margin-bottom: 24px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .financial-summary::before {
+            content: '';
+            position: absolute;
+            width: 150px;
+            height: 150px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 50%;
+            top: -50px;
+            right: -50px;
+        }
+
+        .financial-summary h3 {
+            font-size: 13px;
+            font-weight: 600;
+            opacity: 0.9;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .financial-sum-value {
+            font-size: 32px;
+            font-weight: 800;
+            margin-top: 4px;
+        }
+
+        .financial-grid-sub {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-top: 16px;
+            border-top: 1px solid rgba(255, 255, 255, 0.15);
+            padding-top: 16px;
+        }
+
+        .financial-sub-item span {
+            font-size: 11px;
+            opacity: 0.85;
+            display: block;
+        }
+
+        .financial-sub-item strong {
+            font-size: 15px;
+            font-weight: 700;
+        }
+
+        /* Gráfico Faturamento - SVG Estilizado */
+        .chart-card {
+            background: var(--bg-card);
+            border-radius: 20px;
+            border: 1px solid var(--border-soft);
+            padding: 16px;
+            margin-bottom: 20px;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .chart-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+
+        .chart-bars-container {
+            display: flex;
+            align-items: flex-end;
+            justify-content: space-between;
+            height: 130px;
+            padding: 10px 10px 0 10px;
+            border-bottom: 1.5px solid var(--border-soft);
+            position: relative;
+        }
+
+        .chart-bar-column {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            flex-grow: 1;
+        }
+
+        .chart-bar-fill {
+            width: 16px;
+            background: linear-gradient(to top, var(--rose-gold) 0%, var(--rose-gold-light) 100%);
+            border-radius: 4px 4px 0 0;
+            min-height: 2px;
+            transition: height 0.8s ease;
+            position: relative;
+        }
+
+        .chart-bar-fill:hover::after {
+            content: attr(data-value);
+            position: absolute;
+            top: -24px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--text-cocoa);
+            color: #fff;
+            font-size: 9px;
+            padding: 2px 4px;
+            border-radius: 4px;
+            white-space: nowrap;
+            z-index: 10;
+        }
+
+        .chart-day-label {
+            font-size: 9px;
+            font-weight: bold;
+            color: var(--text-muted);
+            margin-top: 6px;
+        }
+
+        /* Configurações */
+        .config-card {
+            background: var(--bg-card);
+            border-radius: 20px;
+            border: 1px solid var(--border-soft);
+            padding: 16px;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .config-btn-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-top: 12px;
+        }
+
+        .btn-config {
+            width: 100%;
+            padding: 12px;
+            border-radius: 12px;
+            font-size: 13px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: var(--transition);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .btn-config.primary {
+            background-color: var(--rose-gold);
+            color: white;
+            border: none;
+        }
+
+        .btn-config.primary:hover {
+            background-color: var(--rose-gold-dark);
+        }
+
+        .btn-config.secondary {
+            background-color: transparent;
+            color: var(--rose-gold-dark);
+            border: 1.5px solid var(--rose-gold);
+        }
+
+        .btn-config.secondary:hover {
+            background-color: var(--bg-accent-soft);
+        }
+
+        .btn-config.danger {
+            background-color: transparent;
+            color: #d32f2f;
+            border: 1.5px solid #ffa0a0;
+        }
+
+        .btn-config.danger:hover {
+            background-color: #fbe8e8;
+        }
+
+        /* =================================================================
+           10. POPUP MODAL SYSTEM (Add & Edit Dialogs)
+           ================================================================= */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(45, 37, 36, 0.4);
+            backdrop-filter: blur(4px);
+            z-index: 9999;
+            display: none;
+            align-items: flex-end; /* Abre no estilo bottom sheet em celular */
+            justify-content: center;
+            transition: opacity 0.3s ease;
+        }
+
+        @media (min-width: 500px) {
+            .modal-overlay {
+                align-items: center; /* Centralizado em telas maiores */
+            }
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .modal-sheet {
+            background-color: var(--bg-card);
+            border-radius: 24px 24px 0 0;
+            width: 100%;
+            max-width: 500px;
+            padding: 24px 20px 30px 20px;
+            box-shadow: var(--shadow-lg);
+            transform: translateY(100%);
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        @media (min-width: 500px) {
+            .modal-sheet {
+                border-radius: 24px;
+                width: 90%;
+                transform: translateY(50px);
+                opacity: 0;
+                transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            }
+            .modal-overlay.active .modal-sheet {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .modal-overlay.active .modal-sheet {
+            transform: translateY(0);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .modal-header h2 {
+            font-family: var(--font-display);
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--text-cocoa);
+        }
+
+        .modal-close-btn {
+            background: var(--bg-accent-soft);
+            border: none;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--rose-gold-dark);
+            font-weight: bold;
+        }
+
+        /* Forms Styling */
+        .form-group {
+            margin-bottom: 16px;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--text-muted);
+            margin-bottom: 6px;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 12px;
+            border-radius: 12px;
+            border: 1.5px solid var(--border-soft);
+            background: var(--bg-cream);
+            color: var(--text-cocoa);
+            font-family: inherit;
+            font-size: 14px;
+            outline: none;
+            transition: var(--transition);
+        }
+
+        .form-control:focus {
+            border-color: var(--rose-gold);
+            background: var(--bg-card);
+            box-shadow: 0 0 0 3px rgba(197, 139, 126, 0.15);
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+
+        .form-actions-submit {
+            margin-top: 24px;
+        }
+
+        .btn-submit {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, var(--rose-gold) 0%, var(--rose-gold-dark) 100%);
+            border: none;
+            color: white;
+            border-radius: 12px;
+            font-weight: 700;
+            font-size: 14px;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(197, 139, 126, 0.25);
+            transition: var(--transition);
+        }
+
+        .btn-submit:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 6px 16px rgba(197, 139, 126, 0.35);
+        }
+
+        /* Option selector for service type in appointment booking */
+        .option-pills {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 12px;
+        }
+
+        .option-pill {
+            flex: 1;
+            text-align: center;
+            padding: 10px;
+            border-radius: 10px;
+            border: 1.5px solid var(--border-soft);
+            font-size: 12px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: var(--transition);
+            background: var(--bg-card);
+        }
+
+        .option-pill.active {
+            border-color: var(--rose-gold);
+            background: var(--bg-accent-soft);
+            color: var(--rose-gold-dark);
+        }
+
+        /* =================================================================
+           11. FLOATING ACTION BUTTON (FAB) & BOTTOM TAB BAR
+           ================================================================= */
+        .fab-btn {
+            position: fixed;
+            bottom: 95px; /* Acima da barra de navegação */
+            right: 20px;
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--rose-gold) 0%, var(--rose-gold-dark) 100%);
+            color: white;
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 8px 24px rgba(197, 139, 126, 0.4);
+            z-index: 998;
+            transition: var(--transition);
+        }
+
+        .fab-btn:hover {
+            transform: translateY(-2px) rotate(90deg);
+            box-shadow: 0 10px 28px rgba(197, 139, 126, 0.5);
+        }
+
+        /* Barra de Abas Inferior (Fixed Bottom) */
+        .bottom-tabs-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 70px;
+            background-color: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(10px);
+            border-top: 1px solid var(--border-soft);
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            z-index: 999;
+            box-shadow: 0 -4px 15px rgba(58, 47, 45, 0.04);
+        }
+
+        .tab-nav-btn {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            color: var(--text-muted);
+            font-size: 10px;
+            font-weight: 700;
+            width: 60px;
+            height: 100%;
+            transition: var(--transition);
+            gap: 4px;
+        }
+
+        .tab-nav-btn svg {
+            width: 20px;
+            height: 20px;
+            stroke: currentColor;
+            stroke-width: 2.2;
+            fill: none;
+            transition: var(--transition);
+        }
+
+        .tab-nav-btn.active {
+            color: var(--rose-gold-dark);
+        }
+
+        .tab-nav-btn.active svg {
+            transform: scale(1.1);
+        }
+
+        /* =================================================================
+           12. PAGES VISIBILITY CONTROL
+           ================================================================= */
+        .app-page {
+            display: none;
+        }
+
+        .app-page.active {
+            display: block;
+            animation: fadeIn 0.4s ease;
+        }
+
+        /* Status Options Dropdown */
+        .status-dropdown-menu {
+            position: absolute;
+            background: #fff;
+            border: 1px solid var(--border-soft);
+            border-radius: 12px;
+            box-shadow: var(--shadow-lg);
+            z-index: 100;
+            top: 28px;
+            right: 0;
+            display: none;
+            flex-direction: column;
+            overflow: hidden;
+            width: 110px;
+        }
+
+        .status-dropdown-menu.active {
+            display: flex;
+        }
+
+        .status-dropdown-opt {
+            padding: 8px 12px;
+            font-size: 11px;
+            font-weight: bold;
+            cursor: pointer;
+            text-align: left;
+            transition: var(--transition);
+        }
+
+        .status-dropdown-opt:hover {
+            background: var(--bg-cream);
+        }
+
+        /* Empty States Styling */
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: var(--text-muted);
+        }
+
+        .empty-state svg {
+            width: 48px;
+            height: 48px;
+            color: var(--rose-gold-light);
+            margin-bottom: 12px;
+        }
+
+        .empty-state h4 {
+            font-size: 15px;
+            font-weight: 700;
+            color: var(--text-cocoa);
+            margin-bottom: 4px;
+        }
+
+        .empty-state p {
+            font-size: 12px;
+        }
+
+        /* =================================================================
+           13. KEYFRAME ANIMATIONS
+           ================================================================= */
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(15px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- CONTAINER DE NOTIFICAÇÕES (TOAST) -->
+    <div id="toast-container"></div>
+
+    <div class="app-container">
+        
+        <!-- ==========================================
+             CABECALHO & ESTATISTICAS GERAIS (FIXO TOP)
+             ========================================== -->
+        <header>
+            <div class="welcome-row">
+                <div class="welcome-text">
+                    <h1 id="header-salon-name">Bella Unhas</h1>
+                    <p>Espaço de Beleza & Estética</p>
+                </div>
+                <div class="avatar-circle" id="header-avatar">BU</div>
+            </div>
+            
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <span class="stat-label">Hoje</span>
+                    <span class="stat-value" id="stats-total-today">0</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-label">Concluídos</span>
+                    <span class="stat-value" id="stats-done-today" style="color: var(--status-concluido-txt);">0</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-label">Faturado</span>
+                    <span class="stat-value" id="stats-revenue-today" style="color: #27ae60;">R$ 0</span>
+                </div>
+            </div>
+        </header>
+
+        <!-- =================================================================
+             PAGINA 1: AGENDA (TIMELINE DOS COMPROMISSOS)
+             ================================================================= -->
+        <div id="page-agenda" class="app-page active">
+            <!-- Barra Navegadora de Datas -->
+            <div class="date-navigation">
+                <div class="date-slider" id="agenda-date-slider">
+                    <!-- Gerado Dinamicamente por JS -->
+                </div>
+                <div class="calendar-picker-btn">
+                    <!-- Icone de Calendario SVG -->
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+                    <input type="date" id="agenda-calendar-input" onchange="selecionarDataCalendario(this.value)">
+                </div>
+            </div>
+
+            <div class="section-title-row">
+                <h2 class="section-title" id="agenda-date-title">Hoje</h2>
+            </div>
+
+            <!-- Lista de Atendimentos da Data -->
+            <div class="appointment-list" id="agenda-render-list">
+                <!-- Gerado Dinamicamente por JS -->
+            </div>
+        </div>
+
+        <!-- =================================================================
+             PAGINA 2: CLIENTES (CADASTRO E HISTORICO)
+             ================================================================= -->
+        <div id="page-clientes" class="app-page">
+            <div class="search-box">
+                <svg class="search-icon-svg" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
+                <input type="text" id="client-search-input" class="search-input" placeholder="Pesquisar cliente por nome ou celular..." oninput="renderizarClientes()">
+            </div>
+
+            <div class="section-title-row">
+                <h2 class="section-title">Minhas Clientes</h2>
+                <button class="action-btn" onclick="abrirModalCliente()" style="background: var(--bg-accent-soft); border-color: var(--rose-gold-light); color: var(--rose-gold-dark); width: auto; padding: 0 12px; font-weight: bold; font-size: 11px;">+ NOVA CLIENTE</button>
+            </div>
+
+            <div id="clientes-render-list" style="margin-top: 10px;">
+                <!-- Gerado Dinamicamente por JS -->
+            </div>
+        </div>
+
+        <!-- =================================================================
+             PAGINA 3: SERVIÇOS & PACOTES (TABELA DE PREÇOS)
+             ================================================================= -->
+        <div id="page-servicos" class="app-page">
+            <!-- Tabs Alternadoras -->
+            <div class="view-toggle-tabs">
+                <button class="toggle-tab-btn active" id="tab-btn-servicos" onclick="mudarSubAbaServicos('servicos')">Serviços Individuais</button>
+                <button class="toggle-tab-btn" id="tab-btn-pacotes" onclick="mudarSubAbaServicos('pacotes')">Pacotes / Combos</button>
+            </div>
+
+            <!-- Listagem de Serviços Individuais -->
+            <div id="sub-page-servicos" class="sub-aba-content">
+                <div class="section-title-row">
+                    <h2 class="section-title">Preços de Serviços</h2>
+                    <button class="action-btn" onclick="abrirModalServico()" style="background: var(--bg-accent-soft); border-color: var(--rose-gold-light); color: var(--rose-gold-dark); width: auto; padding: 0 12px; font-weight: bold; font-size: 11px;">+ CADASTRAR</button>
+                </div>
+                <div id="servicos-render-list" style="margin-top: 10px;">
+                    <!-- Gerado Dinamicamente por JS -->
+                </div>
+            </div>
+
+            <!-- Listagem de Pacotes / Combos -->
+            <div id="sub-page-pacotes" class="sub-aba-content" style="display:none;">
+                <div class="section-title-row">
+                    <h2 class="section-title">Pacotes & Planos</h2>
+                    <button class="action-btn" onclick="abrirModalPacote()" style="background: var(--bg-accent-soft); border-color: var(--rose-gold-light); color: var(--rose-gold-dark); width: auto; padding: 0 12px; font-weight: bold; font-size: 11px;">+ CRIAR PACOTE</button>
+                </div>
+                <div id="pacotes-render-list" style="margin-top: 10px;">
+                    <!-- Gerado Dinamicamente por JS -->
+                </div>
+            </div>
+        </div>
+
+        <!-- =================================================================
+             PAGINA 4: MENSAGENS (TEMPLATES DE WHATSAPP)
+             ================================================================= -->
+        <div id="page-mensagens" class="app-page">
+            <div class="section-title-row">
+                <h2 class="section-title">Modelos de WhatsApp</h2>
+            </div>
+            
+            <p style="font-size:12px; color: var(--text-muted); margin-bottom:16px;">Configure os textos automáticos. Ao enviar no WhatsApp, as tags serão substituídas pelos dados do agendamento correspondente.</p>
+
+            <div class="message-editor-card">
+                <h3>🔔 Confirmação de Horário</h3>
+                <textarea id="tpl-confirm" onchange="salvarTemplates()"></textarea>
+                <div class="message-tags-legend" data-target="tpl-confirm">
+                    <span class="tag-pill" onclick="inserirTag('tpl-confirm', '{cliente}')">{cliente}</span>
+                    <span class="tag-pill" onclick="inserirTag('tpl-confirm', '{servico}')">{servico}</span>
+                    <span class="tag-pill" onclick="inserirTag('tpl-confirm', '{data}')">{data}</span>
+                    <span class="tag-pill" onclick="inserirTag('tpl-confirm', '{hora}')">{hora}</span>
+                </div>
+            </div>
+
+            <div class="message-editor-card">
+                <h3>⏰ Lembrete do Dia</h3>
+                <textarea id="tpl-reminder" onchange="salvarTemplates()"></textarea>
+                <div class="message-tags-legend" data-target="tpl-reminder">
+                    <span class="tag-pill" onclick="inserirTag('tpl-reminder', '{cliente}')">{cliente}</span>
+                    <span class="tag-pill" onclick="inserirTag('tpl-reminder', '{servico}')">{servico}</span>
+                    <span class="tag-pill" onclick="inserirTag('tpl-reminder', '{data}')">{data}</span>
+                    <span class="tag-pill" onclick="inserirTag('tpl-reminder', '{hora}')">{hora}</span>
+                </div>
+            </div>
+
+            <div class="message-editor-card">
+                <h3>🌸 Mensagem de Agradecimento</h3>
+                <textarea id="tpl-thanks" onchange="salvarTemplates()"></textarea>
+                <div class="message-tags-legend" data-target="tpl-thanks">
+                    <span class="tag-pill" onclick="inserirTag('tpl-thanks', '{cliente}')">{cliente}</span>
+                    <span class="tag-pill" onclick="inserirTag('tpl-thanks', '{servico}')">{servico}</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- =================================================================
+             PAGINA 5: FINANCEIRO & AJUSTES
+             ================================================================= -->
+        <div id="page-financeiro" class="app-page">
+            <div class="financial-summary">
+                <h3>Faturamento Mensal</h3>
+                <div class="financial-sum-value" id="fin-total-month">R$ 0,00</div>
+                
+                <div class="financial-grid-sub">
+                    <div class="financial-sub-item">
+                        <span>Horários Concluídos</span>
+                        <strong id="fin-count-done">0</strong>
+                    </div>
+                    <div class="financial-sub-item">
+                        <span>Ticket Médio</span>
+                        <strong id="fin-ticket-avg">R$ 0,00</strong>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Gráfico de Faturamento dos Últimos 7 Dias -->
+            <div class="chart-card">
+                <div class="chart-header">
+                    <h4 style="font-size: 14px; font-weight: 700; color: var(--text-cocoa);">Receita por Dia (Últimos 7 dias)</h4>
+                </div>
+                <div class="chart-bars-container" id="finance-chart-container">
+                    <!-- Colunas geradas via JS -->
+                </div>
+            </div>
+
+            <!-- Ajustes & Banco de Dados -->
+            <div class="config-card">
+                <h4 style="font-size: 14px; font-weight: 700; color: var(--text-cocoa); margin-bottom: 8px;">Configurações & Backup</h4>
+                <p style="font-size:12px; color: var(--text-muted); margin-bottom: 12px;">Gerencie os dados salvos localmente no seu aparelho.</p>
+                
+                <div class="form-group">
+                    <label>Nome do Studio</label>
+                    <input type="text" id="config-studio-name" class="form-control" onchange="atualizarNomeStudio(this.value)">
+                </div>
+
+                <div class="config-btn-grid">
+                    <button class="btn-config secondary" onclick="exportarBackup()">
+                        <!-- Icone de Download SVG -->
+                        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+                        EXPORTAR DADOS (BACKUP)
+                    </button>
+                    
+                    <button class="btn-config secondary" onclick="document.getElementById('import-file-input').click()">
+                        <!-- Icone de Upload SVG -->
+                        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg>
+                        IMPORTAR DADOS
+                    </button>
+                    <input type="file" id="import-file-input" style="display:none;" onchange="importarBackup(event)">
+
+                    <button class="btn-config danger" onclick="resetarBancoDados()">
+                        <!-- Icone de Lixeira SVG -->
+                        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                        APAGAR E RESETAR SISTEMA
+                    </button>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- ==========================================
+         BOTÕES FIXOS (NAV & FAB)
+         ========================================== -->
+    <!-- Floating Action Button (FAB) -->
+    <button class="fab-btn" onclick="abrirModalAgendamento()" id="agenda-fab">
+        <!-- Icone de + SVG -->
+        <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+    </button>
+
+    <!-- Barra de Navegação Inferior -->
+    <nav class="bottom-tabs-nav">
+        <button class="tab-nav-btn active" onclick="navegarAba('agenda', this)">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+            Agenda
+        </button>
+        <button class="tab-nav-btn" onclick="navegarAba('clientes', this)">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+            Clientes
+        </button>
+        <button class="tab-nav-btn" onclick="navegarAba('servicos', this)">
+            <!-- Icone de Brilhos / Unhas SVG -->
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+            Serviços
+        </button>
+        <button class="tab-nav-btn" onclick="navegarAba('mensagens', this)">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+            Mensagens
+        </button>
+        <button class="tab-nav-btn" onclick="navegarAba('financeiro', this)">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg>
+            Ajustes
+        </button>
+    </nav>
+
+
+    <!-- =================================================================
+         14. DIALOGOS MODAIS (POPUPS INTERATIVOS)
+         ================================================================= -->
+    
+    <!-- MODAL 1: ADICIONAR / EDITAR AGENDAMENTO -->
+    <div class="modal-overlay" id="modal-agendamento">
+        <div class="modal-sheet">
+            <div class="modal-header">
+                <h2 id="modal-agendamento-title">Novo Agendamento</h2>
+                <button class="modal-close-btn" onclick="fecharModais()">×</button>
+            </div>
+            
+            <form id="form-agendamento" onsubmit="salvarAgendamento(event)">
+                <input type="hidden" id="form-apt-id">
+                
+                <div class="form-group">
+                    <label>Selecione a Cliente</label>
+                    <div style="display: flex; gap: 8px;">
+                        <select id="form-apt-client-id" class="form-control" style="flex:1" required>
+                            <!-- Carregado via JS -->
+                        </select>
+                        <button type="button" class="action-btn" onclick="abrirModalClienteRapido()" style="height:44px; width:44px; flex-shrink:0;">👤+</button>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Tipo de Agendamento</label>
+                    <div class="option-pills">
+                        <div class="option-pill active" id="pill-service" onclick="setAptItemType('service')">Serviço Unitário</div>
+                        <div class="option-pill" id="pill-package" onclick="setAptItemType('package')">Sessão de Pacote</div>
+                    </div>
+                    <input type="hidden" id="form-apt-item-type" value="service">
+                </div>
+
+                <div class="form-group">
+                    <label id="form-apt-item-label">Serviço</label>
+                    <select id="form-apt-item-id" class="form-control" onchange="atualizarPrecoSugerido()" required>
+                        <!-- Carregado via JS -->
+                    </select>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Data</label>
+                        <input type="date" id="form-apt-date" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Horário</label>
+                        <input type="time" id="form-apt-time" class="form-control" required>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Valor Cobrado (R$)</label>
+                        <input type="number" step="0.01" id="form-apt-price" class="form-control" required>
+                        <small style="font-size:9px; color:var(--text-muted);">Para pacotes ativos, pode manter R$ 0,00.</small>
+                    </div>
+                    <div class="form-group">
+                        <label>Status Inicial</label>
+                        <select id="form-apt-status" class="form-control">
+                            <option value="Agendado" selected>Agendado</option>
+                            <option value="Concluido">Concluído</option>
+                            <option value="Cancelado">Cancelado</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Notas / Detalhes de Decoração</label>
+                    <input type="text" id="form-apt-notes" class="form-control" placeholder="Ex: Francesinha, esmalte vermelho, unhas amendoadas...">
+                </div>
+
+                <div class="form-actions-submit">
+                    <button type="submit" class="btn-submit">CONFIRMAR HORÁRIO</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL 2: CADASTRO / EDIÇÃO DE CLIENTE -->
+    <div class="modal-overlay" id="modal-cliente">
+        <div class="modal-sheet">
+            <div class="modal-header">
+                <h2 id="modal-cliente-title">Nova Cliente</h2>
+                <button class="modal-close-btn" onclick="fecharModais()">×</button>
+            </div>
+            
+            <form id="form-cliente" onsubmit="salvarCliente(event)">
+                <input type="hidden" id="form-cli-id">
+                <input type="hidden" id="form-cli-is-fast" value="false">
+                
+                <div class="form-group">
+                    <label>Nome Completo</label>
+                    <input type="text" id="form-cli-name" class="form-control" placeholder="Digite o nome da cliente" required>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Celular (WhatsApp)</label>
+                        <input type="tel" id="form-cli-phone" class="form-control" placeholder="11 99999-9999" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Instagram (@usuario)</label>
+                        <input type="text" id="form-cli-instagram" class="form-control" placeholder="ex: beatriz_unhas">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Ficha Técnica / Notas Importantes</label>
+                    <textarea id="form-cli-notes" class="form-control" style="height: 80px;" placeholder="Ex: Prefere cuticulagem funda, unhas sensíveis, alergia a marca tal, etc."></textarea>
+                </div>
+
+                <div class="form-actions-submit">
+                    <button type="submit" class="btn-submit">CADASTRAR CLIENTE</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL 3: CADASTRO / EDIÇÃO DE SERVIÇO -->
+    <div class="modal-overlay" id="modal-servico">
+        <div class="modal-sheet">
+            <div class="modal-header">
+                <h2 id="modal-servico-title">Novo Serviço</h2>
+                <button class="modal-close-btn" onclick="fecharModais()">×</button>
+            </div>
+            
+            <form id="form-servico" onsubmit="salvarServico(event)">
+                <input type="hidden" id="form-srv-id">
+                
+                <div class="form-group">
+                    <label>Nome do Serviço</label>
+                    <input type="text" id="form-srv-name" class="form-control" placeholder="Ex: Alongamento em Gel" required>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Preço Sugerido (R$)</label>
+                        <input type="number" step="0.01" id="form-srv-price" class="form-control" placeholder="0.00" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Duração Estimada (minutos)</label>
+                        <input type="number" id="form-srv-duration" class="form-control" placeholder="Ex: 90" required>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Categoria</label>
+                    <select id="form-srv-category" class="form-control">
+                        <option value="Alongamento">Alongamento</option>
+                        <option value="Blindagem">Blindagem / Banho</option>
+                        <option value="Tradicional" selected>Manicure/Pedicure Comum</option>
+                        <option value="Esmaltação">Esmaltação em Gel</option>
+                        <option value="Outro">Outro / Decoração</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>Descrição do Procedimento</label>
+                    <input type="text" id="form-srv-desc" class="form-control" placeholder="Breve explicação técnica do serviço">
+                </div>
+
+                <div class="form-actions-submit">
+                    <button type="submit" class="btn-submit">SALVAR SERVIÇO</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL 4: CADASTRO / EDIÇÃO DE PACOTE -->
+    <div class="modal-overlay" id="modal-pacote">
+        <div class="modal-sheet">
+            <div class="modal-header">
+                <h2 id="modal-pacote-title">Criar Pacote de Serviços</h2>
+                <button class="modal-close-btn" onclick="fecharModais()">×</button>
+            </div>
+            
+            <form id="form-pacote" onsubmit="salvarPacote(event)">
+                <input type="hidden" id="form-pkt-id">
+                
+                <div class="form-group">
+                    <label>Nome do Pacote / Assinatura</label>
+                    <input type="text" id="form-pkt-name" class="form-control" placeholder="Ex: Plano Mensal VIP (4 Mão + 2 Pé)" required>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Preço do Combo Fechado (R$)</label>
+                        <input type="number" step="0.01" id="form-pkt-price" class="form-control" placeholder="0.00" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Validade recomendada</label>
+                        <select id="form-pkt-validity" class="form-control">
+                            <option value="30 dias" selected>Mensal (30 dias)</option>
+                            <option value="60 dias">Bimestral (60 dias)</option>
+                            <option value="Sem validade">Sem validade</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Descrição detalhada dos itens inclusos</label>
+                    <textarea id="form-pkt-desc" class="form-control" style="height: 80px;" placeholder="Ex: Dá direito a 4 manicures e 2 pedicures a serem consumidas dentro de 30 dias." required></textarea>
+                </div>
+
+                <div class="form-actions-submit">
+                    <button type="submit" class="btn-submit">SALVAR PACOTE</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+
+    <!-- =================================================================
+         15. JAVASCRIPT APLICADO (LÓGICA, BANCO E INTERATIVIDADE)
+         ================================================================= -->
+    <script>
+        // =================================================================
+        // CONFIGURAÇÕES DO BANCO DE DADOS LOCAL
+        // =================================================================
+        const DB_KEY = 'beauty_salon_agenda_db';
+        let db = null;
+        
+        // Data de controle selecionada na tela principal
+        let dataFocoAtual = getOffsetDateString(0); 
+
+        // Auxiliar: Retorna string de data no formato AAAA-MM-DD com offset de dias
+        function getOffsetDateString(offset) {
+            const d = new Date();
+            d.setDate(d.getDate() + offset);
+            return d.toISOString().split('T')[0];
+        }
+
+        // FUNÇÃO DE INICIALIZAÇÃO DO BANCO DE DADOS COM DADOS DE MOCK
+        function inicializarBancoDados() {
+            const localData = localStorage.getItem(DB_KEY);
+            if (localData) {
+                try {
+                    db = JSON.parse(localData);
+                    // Garante que todas as chaves básicas existem
+                    if (!db.services) db.services = [];
+                    if (!db.packages) db.packages = [];
+                    if (!db.clients) db.clients = [];
+                    if (!db.appointments) db.appointments = [];
+                    if (!db.templates) db.templates = {};
+                    if (!db.settings) db.settings = { salonName: "Bella Unhas" };
+                    return;
+                } catch (e) {
+                    console.error("Erro ao ler LocalStorage. Recarregando padrão.", e);
+                }
+            }
+
+            // Inicialização vazia para o usuário preencher
+            db = {
+                version: 1.0,
+                settings: {
+                    salonName: "Studio Bella Unhas"
+                },
+                services: [],
+                packages: [],
+                clients: [],
+                appointments: [],
+                templates: {
+                    confirm: "Olá, {cliente}! ✨\nPassando para confirmar seu atendimento de *{servico}* no dia *{data}* às *{hora}*.\n\nPodemos confirmar? Aguardo você! 💕",
+                    reminder: "Oi, {cliente}! 🌸\nLembrando que seu horário de *{servico}* é hoje, *{data}*, às *{hora}*.\n\nAté logo! Beijos. 😘",
+                    thanks: "Muito obrigada pela visita hoje, {cliente}! 🥰\nSeu atendimento de *{servico}* foi finalizado. Suas unhas ficaram maravilhosas!\n\nQualquer dúvida, estou aqui. Até a próxima! 💅✨"
+                }
+            };
+            salvarBancoDados();
+        }
+
+        // SALVA DADOS NO LOCALSTORAGE
+        function salvarBancoDados() {
+            localStorage.setItem(DB_KEY, JSON.stringify(db));
+        }
+
+        // =================================================================
+        // SYSTEM TOASTS (Avisos de Feedback)
+        // =================================================================
+        function mostrarToast(mensagem, tipo = 'info') {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            toast.className = `toast ${tipo}`;
+            
+            let icone = "✨";
+            if(tipo === 'success') icone = "✅";
+            if(tipo === 'error') icone = "❌";
+            if(tipo === 'warning') icone = "⚠️";
+
+            toast.innerHTML = `<span>${icone}</span><span>${mensagem}</span>`;
+            container.appendChild(toast);
+            
+            setTimeout(() => { toast.classList.add('show'); }, 50);
+            
+            setTimeout(() => {
+                toast.classList.remove('show');
+                setTimeout(() => { toast.remove(); }, 300);
+            }, 3000);
+        }
+
+        // =================================================================
+        // CONTROLES DE ROTEAMENTO (ABAS DE NAVEGAÇÃO)
+        // =================================================================
+        function navegarAba(abaId, btnElement) {
+            // Esconde todas as páginas
+            document.querySelectorAll('.app-page').forEach(page => page.classList.remove('active'));
+            // Desativa botões da barra
+            document.querySelectorAll('.tab-nav-btn').forEach(btn => btn.classList.remove('active'));
+            
+            // Ativa a aba e o botão correspondente
+            const paginaAlvo = document.getElementById(`page-${abaId}`);
+            if (paginaAlvo) paginaAlvo.classList.add('active');
+            if (btnElement) btnElement.classList.add('active');
+
+            // Controla a visibilidade do FAB dependendo da aba
+            const fab = document.getElementById('agenda-fab');
+            if(abaId === 'agenda' || abaId === 'clientes' || abaId === 'servicos') {
+                fab.style.display = 'flex';
+                // Muda a ação do FAB dependendo da aba ativa
+                if(abaId === 'agenda') {
+                    fab.setAttribute('onclick', 'abrirModalAgendamento()');
+                } else if(abaId === 'clientes') {
+                    fab.setAttribute('onclick', 'abrirModalCliente()');
+                } else if(abaId === 'servicos') {
+                    const subAba = document.getElementById('sub-page-servicos').style.display !== 'none' ? 'servico' : 'pacote';
+                    fab.setAttribute('onclick', subAba === 'servico' ? 'abrirModalServico()' : 'abrirModalPacote()');
+                }
+            } else {
+                fab.style.display = 'none';
+            }
+
+            // Inicializa dados na aba selecionada
+            if(abaId === 'agenda') {
+                renderizarAgenda();
+            } else if(abaId === 'clientes') {
+                renderizarClientes();
+            } else if(abaId === 'servicos') {
+                renderizarServicos();
+                renderizarPacotes();
+            } else if(abaId === 'mensagens') {
+                carregarTemplatesUI();
+            } else if(abaId === 'financeiro') {
+                carregarRelatoriosFinanceiros();
+            }
+        }
+
+        function mudarSubAbaServicos(tipo) {
+            document.querySelectorAll('.toggle-tab-btn').forEach(b => b.classList.remove('active'));
+            const subServ = document.getElementById('sub-page-servicos');
+            const subPac = document.getElementById('sub-page-pacotes');
+            const fab = document.getElementById('agenda-fab');
+
+            if(tipo === 'servicos') {
+                document.getElementById('tab-btn-servicos').classList.add('active');
+                subServ.style.display = 'block';
+                subPac.style.display = 'none';
+                fab.setAttribute('onclick', 'abrirModalServico()');
+            } else {
+                document.getElementById('tab-btn-pacotes').classList.add('active');
+                subServ.style.display = 'none';
+                subPac.style.display = 'block';
+                fab.setAttribute('onclick', 'abrirModalPacote()');
+            }
+        }
+
+        // =================================================================
+        // CONTROLE DE DIALOGOS MODAIS (ABRIR / FECHAR)
+        // =================================================================
+        function abrirModal(modalId) {
+            const overlay = document.getElementById(modalId);
+            if(overlay) overlay.classList.add('active');
+        }
+
+        function fecharModais() {
+            document.querySelectorAll('.modal-overlay').forEach(overlay => overlay.classList.remove('active'));
+        }
+
+        // Fechar modal ao clicar fora da folha
+        window.addEventListener('click', function(e) {
+            if(e.target.classList.contains('modal-overlay')) {
+                fecharModais();
+            }
+        });
+
+        // =================================================================
+        // LOGICA DE AGENDA (ABA 1)
+        // =================================================================
+        
+        // Renderiza o seletor de 7 dias úteis rápidos a partir de Hoje
+        function renderizarDateSlider() {
+            const slider = document.getElementById('agenda-date-slider');
+            slider.innerHTML = "";
+            
+            const diasSemana = ["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"];
+            
+            // Loop para gerar Hoje + 6 dias futuros
+            for(let i = -1; i < 6; i++) {
+                const dataLoop = new Date();
+                dataLoop.setDate(dataLoop.getDate() + i);
+                
+                const dataString = dataLoop.toISOString().split('T')[0];
+                const activeClass = dataString === dataFocoAtual ? 'active' : '';
+                
+                let labelDia = diasSemana[dataLoop.getDay()];
+                if(i === 0) labelDia = "Hoje";
+                if(i === 1) labelDia = "Amanhã";
+
+                slider.innerHTML += `
+                    <button class="date-btn ${activeClass}" onclick="selecionarDataAgenda('${dataString}')">
+                        <span class="day-lbl">${labelDia}</span>
+                        <span class="day-num">${dataLoop.getDate()}</span>
+                    </button>
+                `;
+            }
+        }
+
+        // Atualiza fatias da agenda e muda dia ativo
+        function selecionarDataAgenda(dataStr) {
+            dataFocoAtual = dataStr;
+            renderizarDateSlider();
+            renderizarAgenda();
+        }
+
+        // Seletor avançado de data pelo calendário
+        function selecionarDataCalendario(dataStr) {
+            if(!dataStr) return;
+            dataFocoAtual = dataStr;
+            renderizarDateSlider();
+            renderizarAgenda();
+        }
+
+        // Atualiza a visualização da agenda e os mini cards do dia selecionado
+        function renderizarAgenda() {
+            const listContainer = document.getElementById('agenda-render-list');
+            const dataTitle = document.getElementById('agenda-date-title');
+            
+            // Formatador de data elegante
+            const partes = dataFocoAtual.split('-');
+            const dataObjeto = new Date(partes[0], partes[1] - 1, partes[2]);
+            const options = { weekday: 'long', day: 'numeric', month: 'long' };
+            let dataFormatadaLonga = dataObjeto.toLocaleDateString('pt-BR', options);
+            dataFormatadaLonga = dataFormatadaLonga.charAt(0).toUpperCase() + dataFormatadaLonga.slice(1);
+            
+            dataTitle.innerText = dataFormatadaLonga;
+            listContainer.innerHTML = "";
+
+            // Filtra e ordena atendimentos do dia pelo horário
+            const aptsDoDia = db.appointments.filter(a => a.date === dataFocoAtual);
+            aptsDoDia.sort((a, b) => a.time.localeCompare(b.time));
+
+            // Atualiza estatísticas do topo para o dia
+            atualizarEstatisticasDoDia(aptsDoDia);
+
+            if(aptsDoDia.length === 0) {
+                listContainer.innerHTML = `
+                    <div class="empty-state">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
+                        <h4>Nenhum atendimento agendado</h4>
+                        <p>Aproveite para descansar ou adicione novos horários usando o botão de "+".</p>
+                    </div>
+                `;
+                return;
+            }
+
+            aptsDoDia.forEach(apt => {
+                const cliente = db.clients.find(c => c.id === apt.clientId) || { name: "Cliente Desconhecida", phone: "" };
+                
+                let itemNome = "Desconhecido";
+                let duracaoStr = "";
+                
+                if (apt.itemType === 'service') {
+                    const srv = db.services.find(s => s.id === apt.itemId);
+                    itemNome = srv ? srv.name : "Serviço Removido";
+                    duracaoStr = srv ? `${srv.duration} min` : '';
+                } else {
+                    const pkt = db.packages.find(p => p.id === apt.itemId);
+                    itemNome = pkt ? `Sessão de: ${pkt.name}` : "Pacote Removido";
+                    duracaoStr = "Sessão Assinada";
+                }
+
+                // Estilo dos status
+                let statusBg = "var(--status-agendado-bg)";
+                let statusTxt = "var(--status-agendado-txt)";
+                if (apt.status === 'Concluido') {
+                    statusBg = "var(--status-concluido-bg)";
+                    statusTxt = "var(--status-concluido-txt)";
+                } else if (apt.status === 'Cancelado') {
+                    statusBg = "var(--status-cancelado-bg)";
+                    statusTxt = "var(--status-cancelado-txt)";
+                }
+
+                const notaHtml = apt.notes ? `<div class="apt-notes">📝 ${apt.notes}</div>` : '';
+
+                listContainer.innerHTML += `
+                    <div class="apt-card">
+                        <div class="apt-top">
+                            <span class="apt-time">
+                                <!-- Icone de Relogio SVG -->
+                                <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><path d="M12 6v6l4 2"/></svg>
+                                ${apt.time} <span style="font-size:11px; font-weight: normal; color:var(--text-muted);">(${duracaoStr})</span>
+                            </span>
+                            
+                            <div style="position: relative;">
+                                <span class="apt-status-badge" style="background-color: ${statusBg}; color: ${statusTxt};" onclick="toggleStatusDropdown('${apt.id}')">
+                                    ${apt.status} ▾
+                                </span>
+                                <!-- Dropdown de Status Rápido -->
+                                <div class="status-dropdown-menu" id="status-drop-${apt.id}">
+                                    <div class="status-dropdown-opt" style="color:var(--status-agendado-txt);" onclick="alterarStatusAgendamento('${apt.id}', 'Agendado')">Agendado</div>
+                                    <div class="status-dropdown-opt" style="color:var(--status-concluido-txt);" onclick="alterarStatusAgendamento('${apt.id}', 'Concluido')">Concluido</div>
+                                    <div class="status-dropdown-opt" style="color:var(--status-cancelado-txt);" onclick="alterarStatusAgendamento('${apt.id}', 'Cancelado')">Cancelado</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="apt-body">
+                            <div class="apt-client-name">
+                                ${cliente.name}
+                            </div>
+                            <div class="apt-item-name">
+                                <!-- Icone de Unha/Design SVG -->
+                                <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                                ${itemNome}
+                            </div>
+                            ${notaHtml}
+                        </div>
+
+                        <div class="apt-footer">
+                            <div class="apt-price">R$ ${Number(apt.price).toFixed(2)}</div>
+                            <div class="apt-actions">
+                                <button class="action-btn" onclick="abrirEditarAgendamento('${apt.id}')" title="Editar">✏️</button>
+                                <button class="action-btn" onclick="excluirAgendamento('${apt.id}')" title="Excluir">🗑️</button>
+                                <button class="action-btn whatsapp-btn" onclick="toggleWhatsappOptions(event, '${apt.id}')" title="Enviar Mensagem">
+                                    <!-- Icone WhatsApp SVG -->
+                                    <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24"><path d="M12.012 2c-5.506 0-9.989 4.478-9.99 9.984a9.96 9.96 0 001.333 4.982L2 22l5.202-1.362a9.927 9.927 0 004.8 1.226h.006c5.506 0 9.99-4.479 9.99-9.986.002-2.67-1.037-5.178-2.927-7.07C17.186 2.916 14.683 2 12.012 2zm4.568 14.175c-.25.703-1.458 1.282-2.006 1.373-.5.083-1.15.154-3.353-.758-2.816-1.168-4.63-4.037-4.77-4.225-.143-.188-1.158-1.54-1.158-2.936 0-1.397.732-2.083 1.01-2.366.278-.283.608-.354.811-.354.203 0 .406.002.583.01.183.008.43.006.664.556.244.577.833 2.031.905 2.175.071.145.12.314.02.513-.098.199-.148.314-.298.487-.15.173-.314.385-.448.517-.148.145-.303.303-.13.603.172.3.766 1.262 1.644 2.044.173.154.341.272.548.339.206.067.394.048.542-.016.148-.063.633-.736.802-.988.169-.252.339-.211.572-.125.234.086 1.479.697 1.733.824.253.127.422.19.485.297.062.107.062.616-.188 1.32z"/></svg>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        // Estatísticas diárias
+        function atualizarEstatisticasDoDia(apts) {
+            const total = apts.length;
+            const concluidos = apts.filter(a => a.status === 'Concluido').length;
+            const faturado = apts
+                .filter(a => a.status === 'Concluido')
+                .reduce((acc, curr) => acc + Number(curr.price), 0);
+
+            document.getElementById('stats-total-today').innerText = total;
+            document.getElementById('stats-done-today').innerText = concluidos;
+            document.getElementById('stats-revenue-today').innerText = `R$ ${faturado}`;
+        }
+
+        // Toggle Status Dropdown
+        function toggleStatusDropdown(aptId) {
+            const dropdown = document.getElementById(`status-drop-${aptId}`);
+            const isActive = dropdown.classList.contains('active');
+            
+            // Fecha todos os dropdowns abertos antes
+            document.querySelectorAll('.status-dropdown-menu').forEach(d => d.classList.remove('active'));
+            
+            if(!isActive) {
+                dropdown.classList.add('active');
+            }
+        }
+
+        // Altera status de atendimento pelo dropdown rápido
+        function alterarStatusAgendamento(id, novoStatus) {
+            const index = db.appointments.findIndex(a => a.id === id);
+            if (index !== -1) {
+                db.appointments[index].status = novoStatus;
+                salvarBancoDados();
+                renderizarAgenda();
+                mostrarToast(`Status alterado para "${novoStatus}"!`, 'success');
+            }
+        }
+
+        // Fechar dropdowns de status ao clicar em qualquer lugar da tela
+        window.addEventListener('click', function(e) {
+            if(!e.target.classList.contains('apt-status-badge')) {
+                document.querySelectorAll('.status-dropdown-menu').forEach(d => d.classList.remove('active'));
+            }
+        });
+
+        // Excluir agendamento
+        function excluirAgendamento(id) {
+            if(confirm("Tem certeza que deseja excluir este agendamento?")) {
+                db.appointments = db.appointments.filter(a => a.id !== id);
+                salvarBancoDados();
+                renderizarAgenda();
+                mostrarToast("Agendamento removido!", "warning");
+            }
+        }
+
+        // =================================================================
+        // CADASTROS & FORMULÁRIOS DE AGENDAMENTO (MODAL 1)
+        // =================================================================
+        
+        function setAptItemType(type) {
+            document.getElementById('form-apt-item-type').value = type;
+            const pillService = document.getElementById('pill-service');
+            const pillPackage = document.getElementById('pill-package');
+            const labelItem = document.getElementById('form-apt-item-label');
+            const selectItem = document.getElementById('form-apt-item-id');
+
+            if(type === 'service') {
+                pillService.classList.add('active');
+                pillPackage.classList.remove('active');
+                labelItem.innerText = "Serviço";
+                
+                // Preenche select com serviços
+                selectItem.innerHTML = db.services.map(s => `<option value="${s.id}">${s.name} - R$ ${s.price.toFixed(2)}</option>`).join('');
+            } else {
+                pillService.classList.remove('active');
+                pillPackage.classList.add('active');
+                labelItem.innerText = "Pacote Selecionado";
+                
+                // Preenche select com pacotes
+                selectItem.innerHTML = db.packages.map(p => `<option value="${p.id}">${p.name}</option>`).join('');
+            }
+            atualizarPrecoSugerido();
+        }
+
+        function atualizarPrecoSugerido() {
+            const type = document.getElementById('form-apt-item-type').value;
+            const id = document.getElementById('form-apt-item-id').value;
+            const priceInput = document.getElementById('form-apt-price');
+
+            if(type === 'service') {
+                const srv = db.services.find(s => s.id === id);
+                if(srv) priceInput.value = srv.price;
+            } else {
+                // Sessões de pacotes costumam ter preço sugerido de R$ 0,00 no ato do atendimento individual, 
+                // pois já foram pagos na contratação do combo.
+                priceInput.value = 0.00;
+            }
+        }
+
+        function abrirModalAgendamento() {
+            document.getElementById('form-agendamento').reset();
+            document.getElementById('form-apt-id').value = "";
+            document.getElementById('modal-agendamento-title').innerText = "Novo Agendamento";
+            
+            // Popula lista de clientes
+            const selectClientes = document.getElementById('form-apt-client-id');
+            if(db.clients.length === 0) {
+                selectClientes.innerHTML = `<option value="">Nenhuma cliente cadastrada!</option>`;
+            } else {
+                selectClientes.innerHTML = db.clients.map(c => `<option value="${c.id}">${c.name}</option>`).join('');
+            }
+
+            // Define data padrão como a data ativa no painel principal
+            document.getElementById('form-apt-date').value = dataFocoAtual;
+
+            // Define tipo padrão como Serviço
+            setAptItemType('service');
+            
+            abrirModal('modal-agendamento');
+        }
+
+        function abrirEditarAgendamento(id) {
+            const apt = db.appointments.find(a => a.id === id);
+            if(!apt) return;
+
+            document.getElementById('form-apt-id').value = apt.id;
+            document.getElementById('modal-agendamento-title').innerText = "Editar Horário";
+            
+            // Popula clientes
+            const selectClientes = document.getElementById('form-apt-client-id');
+            selectClientes.innerHTML = db.clients.map(c => `<option value="${c.id}">${c.name}</option>`).join('');
+            selectClientes.value = apt.clientId;
+
+            // Configura tipo e item
+            setAptItemType(apt.itemType);
+            document.getElementById('form-apt-item-id').value = apt.itemId;
+            
+            document.getElementById('form-apt-date').value = apt.date;
+            document.getElementById('form-apt-time').value = apt.time;
+            document.getElementById('form-apt-price').value = apt.price;
+            document.getElementById('form-apt-status').value = apt.status;
+            document.getElementById('form-apt-notes').value = apt.notes || '';
+
+            abrirModal('modal-agendamento');
+        }
+
+        function salvarAgendamento(e) {
+            e.preventDefault();
+            const id = document.getElementById('form-apt-id').value;
+            const clientId = document.getElementById('form-apt-client-id').value;
+            
+            if(!clientId) {
+                mostrarToast("Adicione ou selecione uma cliente antes!", "error");
+                return;
+            }
+
+            const itemType = document.getElementById('form-apt-item-type').value;
+            const itemId = document.getElementById('form-apt-item-id').value;
+            const date = document.getElementById('form-apt-date').value;
+            const time = document.getElementById('form-apt-time').value;
+            const price = Number(document.getElementById('form-apt-price').value);
+            const status = document.getElementById('form-apt-status').value;
+            const notes = document.getElementById('form-apt-notes').value;
+
+            if (id) {
+                // Modo Edição
+                const idx = db.appointments.findIndex(a => a.id === id);
+                if (idx !== -1) {
+                    db.appointments[idx] = { id, clientId, itemType, itemId, date, time, price, status, notes };
+                    mostrarToast("Agendamento atualizado!", "success");
+                }
+            } else {
+                // Modo Novo
+                const novoApt = {
+                    id: 'a_' + Date.now(),
+                    clientId, itemType, itemId, date, time, price, status, notes
+                };
+                db.appointments.push(novoApt);
+                mostrarToast("Agendamento criado com sucesso!", "success");
+            }
+
+            salvarBancoDados();
+            fecharModais();
+            
+            // Foca a data do agendamento criado no slider
+            dataFocoAtual = date;
+            renderizarDateSlider();
+            renderizarAgenda();
+        }
+
+        // =================================================================
+        // LOGICA DE CLIENTES (ABA 2)
+        // =================================================================
+        
+        function abrirModalCliente() {
+            document.getElementById('form-cliente').reset();
+            document.getElementById('form-cli-id').value = "";
+            document.getElementById('form-cli-is-fast').value = "false";
+            document.getElementById('modal-cliente-title').innerText = "Nova Cliente";
+            abrirModal('modal-cliente');
+        }
+
+        // Atalho rápido de cadastro dentro do agendamento
+        function abrirModalClienteRapido() {
+            document.getElementById('form-cliente').reset();
+            document.getElementById('form-cli-id').value = "";
+            document.getElementById('form-cli-is-fast').value = "true";
+            document.getElementById('modal-cliente-title').innerText = "Cadastrar Cliente Rápido";
+            abrirModal('modal-cliente');
+        }
+
+        function abrirEditarCliente(id) {
+            const cli = db.clients.find(c => c.id === id);
+            if(!cli) return;
+
+            document.getElementById('form-cli-id').value = cli.id;
+            document.getElementById('form-cli-is-fast').value = "false";
+            document.getElementById('modal-cliente-title').innerText = "Editar Ficha de Cliente";
+            
+            document.getElementById('form-cli-name').value = cli.name;
+            document.getElementById('form-cli-phone').value = cli.phone;
+            document.getElementById('form-cli-instagram').value = cli.instagram || '';
+            document.getElementById('form-cli-notes').value = cli.notes || '';
+
+            abrirModal('modal-cliente');
+        }
+
+        function salvarCliente(e) {
+            e.preventDefault();
+            const id = document.getElementById('form-cli-id').value;
+            const isFast = document.getElementById('form-cli-is-fast').value === 'true';
+            
+            const name = document.getElementById('form-cli-name').value;
+            const phone = document.getElementById('form-cli-phone').value.replace(/\D/g, ''); // Apenas números
+            const instagram = document.getElementById('form-cli-instagram').value.replace('@', ''); // Limpa @
+            const notes = document.getElementById('form-cli-notes').value;
+
+            let clienteIdRes = "";
+
+            if(id) {
+                const idx = db.clients.findIndex(c => c.id === id);
+                if(idx !== -1) {
+                    db.clients[idx] = { id, name, phone, instagram, notes };
+                    clienteIdRes = id;
+                    mostrarToast("Dados da cliente atualizados!", "success");
+                }
+            } else {
+                clienteIdRes = 'c_' + Date.now();
+                const novoCli = { id: clienteIdRes, name, phone, instagram, notes };
+                db.clients.push(novoCli);
+                mostrarToast("Cliente cadastrada com sucesso!", "success");
+            }
+
+            salvarBancoDados();
+            fecharModais();
+
+            // Se veio do atalho rápido do agendamento, atualiza a lista de seleção
+            if(isFast) {
+                abrirModalAgendamento();
+                document.getElementById('form-apt-client-id').value = clienteIdRes;
+            } else {
+                renderizarClientes();
+            }
+        }
+
+        function excluirCliente(id) {
+            const vinculos = db.appointments.filter(a => a.clientId === id).length;
+            let confirmMsg = "Deseja realmente excluir esta cliente?";
+            if(vinculos > 0) {
+                confirmMsg = `Esta cliente possui ${vinculos} atendimentos vinculados. Se você excluir a cliente, esses atendimentos ficarão órfãos. Excluir mesmo assim?`;
+            }
+
+            if(confirm(confirmMsg)) {
+                db.clients = db.clients.filter(c => c.id !== id);
+                salvarBancoDados();
+                renderizarClientes();
+                mostrarToast("Cliente removida!", "warning");
+            }
+        }
+
+        function toggleHistoricoCliente(id) {
+            const content = document.getElementById(`cli-hist-${id}`);
+            const isVisible = content.classList.contains('active');
+            
+            if(isVisible) {
+                content.classList.remove('active');
+            } else {
+                content.classList.add('active');
+            }
+        }
+
+        // Renderiza lista de clientes na UI com filtros de busca
+        function renderizarClientes() {
+            const list = document.getElementById('clientes-render-list');
+            const busca = document.getElementById('client-search-input').value.toLowerCase();
+            list.innerHTML = "";
+
+            let filtrados = db.clients;
+            if(busca) {
+                filtrados = db.clients.filter(c => 
+                    c.name.toLowerCase().includes(busca) || 
+                    c.phone.includes(busca)
+                );
+            }
+
+            if(filtrados.length === 0) {
+                list.innerHTML = `
+                    <div class="empty-state">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" /></svg>
+                        <h4>Nenhuma cliente encontrada</h4>
+                        <p>Tente outro nome ou adicione uma nova cliente.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            filtrados.forEach(cli => {
+                const histApts = db.appointments.filter(a => a.clientId === cli.id);
+                histApts.sort((a, b) => b.date.localeCompare(a.date) || b.time.localeCompare(a.time));
+
+                // Estatísticas da cliente
+                const totalGasto = histApts.filter(a => a.status === 'Concluido').reduce((acc, curr) => acc + Number(curr.price), 0);
+                const totalPresencas = histApts.filter(a => a.status === 'Concluido').length;
+
+                let histHtml = "";
+                if(histApts.length === 0) {
+                    histHtml = `<div class="hist-item">Nenhum atendimento registrado.</div>`;
+                } else {
+                    histApts.forEach(apt => {
+                        let itemNome = "Procedimento";
+                        if (apt.itemType === 'service') {
+                            const srv = db.services.find(s => s.id === apt.itemId);
+                            itemNome = srv ? srv.name : "Serviço";
+                        } else {
+                            const pkt = db.packages.find(p => p.id === apt.itemId);
+                            itemNome = pkt ? pkt.name : "Pacote";
+                        }
+
+                        // Formata data brasileira
+                        const dp = apt.date.split('-');
+                        const dataBr = `${dp[2]}/${dp[1]}`;
+
+                        histHtml += `
+                            <div class="hist-item ${apt.status === 'Concluido' ? 'concluido' : ''}">
+                                <span>📅 ${dataBr} às ${apt.time} - <b>${itemNome}</b></span>
+                                <span style="font-weight:700;">R$ ${Number(apt.price).toFixed(2)}</span>
+                            </div>
+                        `;
+                    });
+                }
+
+                const instaLink = cli.instagram 
+                    ? `<a href="https://instagram.com/${cli.instagram}" target="_blank" class="client-social-link">📸 @${cli.instagram}</a>` 
+                    : '';
+
+                const notasFicha = cli.notes ? `<p style="margin-top: 8px; font-style: italic; color:var(--rose-gold-dark);">📋 Ficha: ${cli.notes}</p>` : '';
+
+                list.innerHTML += `
+                    <div class="client-card">
+                        <div class="client-header">
+                            <div class="client-info-main">
+                                <h3>${cli.name}</h3>
+                                <p>
+                                    <!-- Celular -->
+                                    <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+                                    ${formatarCelular(cli.phone)}
+                                </p>
+                                ${instaLink}
+                                ${notasFicha}
+                            </div>
+                            <div class="client-actions">
+                                <button class="action-btn" onclick="abrirEditarCliente('${cli.id}')">✏️</button>
+                                <button class="action-btn" onclick="excluirCliente('${cli.id}')">🗑️</button>
+                            </div>
+                        </div>
+
+                        <div class="client-history-toggle" onclick="toggleHistoricoCliente('${cli.id}')">
+                            <span>Frequência: ${totalPresencas} atendimentos | Investimento: R$ ${totalGasto.toFixed(2)}</span>
+                            <span>Histórico ▾</span>
+                        </div>
+                        
+                        <div class="client-history-content" id="cli-hist-${cli.id}">
+                            ${histHtml}
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        // Formatador para celular amigável
+        function formatarCelular(str) {
+            if(!str) return "";
+            if (str.length === 11) {
+                return `(${str.slice(0,2)}) ${str.slice(2,7)}-${str.slice(7)}`;
+            } else if (str.length === 10) {
+                return `(${str.slice(0,2)}) ${str.slice(2,6)}-${str.slice(6)}`;
+            }
+            return str;
+        }
+
+        // =================================================================
+        // ABA DE SERVIÇOS & PACOTES (ABA 3)
+        // =================================================================
+        
+        function abrirModalServico() {
+            document.getElementById('form-servico').reset();
+            document.getElementById('form-srv-id').value = "";
+            document.getElementById('modal-servico-title').innerText = "Novo Serviço";
+            abrirModal('modal-servico');
+        }
+
+        function abrirEditarServico(id) {
+            const srv = db.services.find(s => s.id === id);
+            if(!srv) return;
+
+            document.getElementById('form-srv-id').value = srv.id;
+            document.getElementById('modal-servico-title').innerText = "Editar Serviço";
+            
+            document.getElementById('form-srv-name').value = srv.name;
+            document.getElementById('form-srv-price').value = srv.price;
+            document.getElementById('form-srv-duration').value = srv.duration;
+            document.getElementById('form-srv-category').value = srv.category;
+            document.getElementById('form-srv-desc').value = srv.desc || '';
+
+            abrirModal('modal-servico');
+        }
+
+        function salvarServico(e) {
+            e.preventDefault();
+            const id = document.getElementById('form-srv-id').value;
+            const name = document.getElementById('form-srv-name').value;
+            const price = Number(document.getElementById('form-srv-price').value);
+            const duration = Number(document.getElementById('form-srv-duration').value);
+            const category = document.getElementById('form-srv-category').value;
+            const desc = document.getElementById('form-srv-desc').value;
+
+            if (id) {
+                const idx = db.services.findIndex(s => s.id === id);
+                if (idx !== -1) {
+                    db.services[idx] = { id, name, price, duration, category, desc };
+                    mostrarToast("Serviço atualizado!", "success");
+                }
+            } else {
+                const novoSrv = { id: 's_' + Date.now(), name, price, duration, category, desc };
+                db.services.push(novoSrv);
+                mostrarToast("Serviço adicionado!", "success");
+            }
+
+            salvarBancoDados();
+            fecharModais();
+            renderizarServicos();
+        }
+
+        function excluirServico(id) {
+            if(confirm("Tem certeza que deseja excluir este serviço?")) {
+                db.services = db.services.filter(s => s.id !== id);
+                salvarBancoDados();
+                renderizarServicos();
+                mostrarToast("Serviço removido!", "warning");
+            }
+        }
+
+        // Renderização dos Serviços
+        function renderizarServicos() {
+            const list = document.getElementById('servicos-render-list');
+            list.innerHTML = "";
+
+            if(db.services.length === 0) {
+                list.innerHTML = `
+                    <div class="empty-state">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" /></svg>
+                        <h4>Nenhum serviço cadastrado</h4>
+                        <p>Adicione os serviços oferecidos e os preços cobrados.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            db.services.forEach(srv => {
+                list.innerHTML += `
+                    <div class="service-card">
+                        <div class="item-details">
+                            <span class="tag-pill" style="margin-left: 0; background: var(--bg-accent-soft); pointer-events:none;">${srv.category}</span>
+                            <h4 style="margin-top: 4px;">${srv.name}</h4>
+                            <div class="item-meta">
+                                <span>⏰ ${srv.duration} minutos</span>
+                            </div>
+                            ${srv.desc ? `<div class="item-desc">${srv.desc}</div>` : ''}
+                        </div>
+                        <div class="item-price-action">
+                            <span class="item-price-tag">R$ ${srv.price.toFixed(2)}</span>
+                            <div style="display:flex; gap:6px;">
+                                <button class="action-btn" onclick="abrirEditarServico('${srv.id}')">✏️</button>
+                                <button class="action-btn" onclick="excluirServico('${srv.id}')">🗑️</button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        // LÓGICA DE PACOTES
+        function abrirModalPacote() {
+            document.getElementById('form-pacote').reset();
+            document.getElementById('form-pkt-id').value = "";
+            document.getElementById('modal-pacote-title').innerText = "Novo Pacote / Combo";
+            abrirModal('modal-pacote');
+        }
+
+        function abrirEditarPacote(id) {
+            const pkt = db.packages.find(p => p.id === id);
+            if(!pkt) return;
+
+            document.getElementById('form-pkt-id').value = pkt.id;
+            document.getElementById('modal-pacote-title').innerText = "Editar Pacote";
+            
+            document.getElementById('form-pkt-name').value = pkt.name;
+            document.getElementById('form-pkt-price').value = pkt.price;
+            document.getElementById('form-pkt-desc').value = pkt.desc;
+
+            abrirModal('modal-pacote');
+        }
+
+        function salvarPacote(e) {
+            e.preventDefault();
+            const id = document.getElementById('form-pkt-id').value;
+            const name = document.getElementById('form-pkt-name').value;
+            const price = Number(document.getElementById('form-pkt-price').value);
+            const desc = document.getElementById('form-pkt-desc').value;
+
+            if (id) {
+                const idx = db.packages.findIndex(p => p.id === id);
+                if (idx !== -1) {
+                    db.packages[idx] = { id, name, price, desc };
+                    mostrarToast("Combo atualizado!", "success");
+                }
+            } else {
+                const novoPkt = { id: 'p_' + Date.now(), name, price, desc };
+                db.packages.push(novoPkt);
+                mostrarToast("Combo criado com sucesso!", "success");
+            }
+
+            salvarBancoDados();
+            fecharModais();
+            renderizarPacotes();
+        }
+
+        function excluirPacote(id) {
+            if(confirm("Deseja mesmo remover este pacote promocional?")) {
+                db.packages = db.packages.filter(p => p.id !== id);
+                salvarBancoDados();
+                renderizarPacotes();
+                mostrarToast("Pacote removido!", "warning");
+            }
+        }
+
+        // Renderização dos Pacotes
+        function renderizarPacotes() {
+            const list = document.getElementById('pacotes-render-list');
+            list.innerHTML = "";
+
+            if(db.packages.length === 0) {
+                list.innerHTML = `
+                    <div class="empty-state">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" /></svg>
+                        <h4>Nenhum pacote promocional</h4>
+                        <p>Crie combos mensais (Ex: Assinatura de Mão Semanal) para fidelizar suas clientes.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            db.packages.forEach(pkt => {
+                list.innerHTML += `
+                    <div class="package-card">
+                        <div class="item-details" style="flex:1; padding-right:15px;">
+                            <h4>${pkt.name}</h4>
+                            <div class="item-desc" style="margin-top:4px; font-style:normal;">${pkt.desc}</div>
+                        </div>
+                        <div class="item-price-action">
+                            <span class="item-price-tag">R$ ${pkt.price.toFixed(2)}</span>
+                            <div style="display:flex; gap:6px;">
+                                <button class="action-btn" onclick="abrirEditarPacote('${pkt.id}')">✏️</button>
+                                <button class="action-btn" onclick="excluirPacote('${pkt.id}')">🗑️</button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        // =================================================================
+        // WHATSAPP TEMPLATES & SUBSTITUIÇÃO DE TAGS (ABA 4)
+        // =================================================================
+        
+        function carregarTemplatesUI() {
+            document.getElementById('tpl-confirm').value = db.templates.confirm;
+            document.getElementById('tpl-reminder').value = db.templates.reminder;
+            document.getElementById('tpl-thanks').value = db.templates.thanks;
+        }
+
+        function salvarTemplates() {
+            db.templates.confirm = document.getElementById('tpl-confirm').value;
+            db.templates.reminder = document.getElementById('tpl-reminder').value;
+            db.templates.thanks = document.getElementById('tpl-thanks').value;
+            salvarBancoDados();
+            mostrarToast("Modelos salvos automaticamente!", "success");
+        }
+
+        // Insere tag dinamicamente na posição do cursor
+        function inserirTag(textareaId, tag) {
+            const textarea = document.getElementById(textareaId);
+            const start = textarea.selectionStart;
+            const end = textarea.selectionEnd;
+            const text = textarea.value;
+            
+            textarea.value = text.substring(0, start) + tag + text.substring(end);
+            textarea.focus();
+            textarea.selectionStart = textarea.selectionEnd = start + tag.length;
+            
+            // Força o gatilho de salvamento
+            salvarTemplates();
+        }
+
+        // Substituição das Tags Dinâmicas
+        function processarTextoMensagem(template, apt) {
+            const cliente = db.clients.find(c => c.id === apt.clientId) || { name: "Cliente", phone: "" };
+            
+            let itemNome = "Procedimento";
+            if(apt.itemType === 'service') {
+                const srv = db.services.find(s => s.id === apt.itemId);
+                itemNome = srv ? srv.name : "Serviço";
+            } else {
+                const pkt = db.packages.find(p => p.id === apt.itemId);
+                itemNome = pkt ? pkt.name : "Pacote";
+            }
+
+            // Data formatada para leitura
+            const dp = apt.date.split('-');
+            const dataObjeto = new Date(dp[0], dp[1] - 1, dp[2]);
+            const options = { day: 'numeric', month: 'numeric' };
+            const dataSimplificada = dataObjeto.toLocaleDateString('pt-BR', options);
+
+            let texto = template;
+            texto = texto.replaceAll('{cliente}', cliente.name.split(' ')[0]); // Primeiro nome
+            texto = texto.replaceAll('{servico}', itemNome);
+            texto = texto.replaceAll('{data}', dataSimplificada);
+            texto = texto.replaceAll('{hora}', apt.time);
+            texto = texto.replaceAll('{valor}', `R$ ${Number(apt.price).toFixed(2)}`);
+
+            return texto;
+        }
+
+        // Menu Flutuante ao Clicar no WhatsApp do Card
+        function toggleWhatsappOptions(event, aptId) {
+            // Previne propagação indesejada
+            event.stopPropagation();
+            
+            const apt = db.appointments.find(a => a.id === aptId);
+            if(!apt) return;
+            
+            const cliente = db.clients.find(c => c.id === apt.clientId);
+            if(!cliente || !cliente.phone) {
+                mostrarToast("Celular do cliente não cadastrado ou em branco!", "error");
+                return;
+            }
+
+            // Cria dropdown flutuante temporário próximo ao clique
+            const antigo = document.getElementById('temp-zap-menu');
+            if(antigo) antigo.remove();
+
+            const menu = document.createElement('div');
+            menu.id = 'temp-zap-menu';
+            menu.className = 'status-dropdown-menu';
+            menu.style.display = 'flex';
+            menu.style.position = 'fixed';
+            menu.style.top = `${event.clientY + 10}px`;
+            menu.style.left = `${event.clientX - 100}px`;
+            menu.style.width = '160px';
+            menu.style.zIndex = '10000';
+
+            menu.innerHTML = `
+                <div class="status-dropdown-opt" onclick="dispararWhatsApp('${aptId}', 'confirm')">Confirmar Horário</div>
+                <div class="status-dropdown-opt" onclick="dispararWhatsApp('${aptId}', 'reminder')">Lembrar no Dia</div>
+                <div class="status-dropdown-opt" onclick="dispararWhatsApp('${aptId}', 'thanks')">Agradecimento</div>
+            `;
+
+            document.body.appendChild(menu);
+        }
+
+        // Dispara envio final da mensagem preenchendo o link do WhatsApp
+        function dispararWhatsApp(aptId, tplType) {
+            const apt = db.appointments.find(a => a.id === aptId);
+            if(!apt) return;
+
+            const cliente = db.clients.find(c => c.id === apt.clientId);
+            const templateStr = db.templates[tplType];
+
+            if(!templateStr) {
+                mostrarToast("Template de mensagem não configurado!", "error");
+                return;
+            }
+
+            const mensagemPronta = processarTextoMensagem(templateStr, apt);
+            
+            // Garante DDI 55 no link do Brasil se não informado
+            let fone = cliente.phone;
+            if(!fone.startsWith('55') && fone.length <= 11) {
+                fone = '55' + fone;
+            }
+
+            const link = `https://api.whatsapp.com/send?phone=${fone}&text=${encodeURIComponent(mensagemPronta)}`;
+            
+            // Limpa o menu flutuante
+            const antigo = document.getElementById('temp-zap-menu');
+            if(antigo) antigo.remove();
+
+            // Abre o aplicativo de WhatsApp
+            window.open(link, '_blank');
+        }
+
+        // Limpa o menu de whatsapp se clicar em qualquer lugar da tela
+        window.addEventListener('click', function() {
+            const antigo = document.getElementById('temp-zap-menu');
+            if(antigo) antigo.remove();
+        });
+
+        // =================================================================
+        // FINANCEIRO & RELATÓRIOS (ABA 5)
+        // =================================================================
+        
+        function carregarRelatoriosFinanceiros() {
+            // Configurações iniciais de Nome na UI
+            document.getElementById('config-studio-name').value = db.settings.salonName || "Bella Unhas";
+
+            // Lógica de cálculo mensal
+            const hoje = new Date();
+            const mesCorrente = String(hoje.getMonth() + 1).padStart(2, '0');
+            const anoCorrente = String(hoje.getFullYear());
+            
+            // Agendamentos concluídos no mês
+            const concluidosMes = db.appointments.filter(a => {
+                const partes = a.date.split('-'); // [AAAA, MM, DD]
+                return partes[0] === anoCorrente && partes[1] === mesCorrente && a.status === 'Concluido';
+            });
+
+            const totalFaturado = concluidosMes.reduce((acc, curr) => acc + Number(curr.price), 0);
+            const qtdConcluidos = concluidosMes.length;
+            const ticketMedio = qtdConcluidos > 0 ? (totalFaturado / qtdConcluidos) : 0;
+
+            document.getElementById('fin-total-month').innerText = `R$ ${totalFaturado.toFixed(2)}`;
+            document.getElementById('fin-count-done').innerText = qtdConcluidos;
+            document.getElementById('fin-ticket-avg').innerText = `R$ ${ticketMedio.toFixed(2)}`;
+
+            // Renderiza o gráfico de barras dos últimos 7 dias
+            renderizarGraficoFinanceiro();
+        }
+
+        function renderizarGraficoFinanceiro() {
+            const container = document.getElementById('finance-chart-container');
+            container.innerHTML = "";
+
+            let maxFaturadoNoPeriodo = 10; // Valor minimo para escala de divisão
+
+            // Monta dados dos últimos 7 dias corridos
+            let diasArray = [];
+            for (let i = 6; i >= 0; i--) {
+                const dataStr = getOffsetDateString(-i);
+                
+                // Soma faturamento concluído no dia
+                const totalDia = db.appointments
+                    .filter(a => a.date === dataStr && a.status === 'Concluido')
+                    .reduce((acc, curr) => acc + Number(curr.price), 0);
+
+                if(totalDia > maxFaturadoNoPeriodo) {
+                    maxFaturadoNoPeriodo = totalDia;
+                }
+
+                // Legenda simplificada: DD/MM
+                const partes = dataStr.split('-');
+                const labelFormatada = `${partes[2]}/${partes[1]}`;
+
+                diasArray.push({ label: labelFormatada, valor: totalDia });
+            }
+
+            // Gera as colunas na interface
+            diasArray.forEach(dia => {
+                // Proporção de altura da barra baseada no maior faturamento do período
+                const porcentagemAltura = (dia.valor / maxFaturadoNoPeriodo) * 100;
+                
+                container.innerHTML += `
+                    <div class="chart-bar-column">
+                        <div class="chart-bar-fill" style="height: ${porcentagemAltura}%;" data-value="R$ ${dia.valor.toFixed(0)}"></div>
+                        <span class="chart-day-label">${dia.label}</span>
+                    </div>
+                `;
+            });
+        }
+
+        function atualizarNomeStudio(nome) {
+            if(!nome) return;
+            db.settings.salonName = nome;
+            salvarBancoDados();
+            document.getElementById('header-salon-name').innerText = nome;
+            
+            // Atualiza Avatar Circular (iniciais)
+            const iniciais = nome.split(' ').map(n => n[0]).join('').substring(0,2).toUpperCase();
+            document.getElementById('header-avatar').innerText = iniciais || "BU";
+            mostrarToast("Nome do estúdio atualizado!", "success");
+        }
+
+        // =================================================================
+        // BACKUP & EXPORTAÇÃO DE ARQUIVOS
+        // =================================================================
+        
+        function exportarBackup() {
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(db, null, 2));
+            const downloadAnchor = document.createElement('a');
+            downloadAnchor.setAttribute("href", dataStr);
+            
+            const dataHoje = new Date().toISOString().split('T')[0];
+            downloadAnchor.setAttribute("download", `backup_agenda_${dataHoje}.json`);
+            document.body.appendChild(downloadAnchor);
+            downloadAnchor.click();
+            downloadAnchor.remove();
+            mostrarToast("Backup exportado!", "success");
+        }
+
+        function importarBackup(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const dadosImportados = JSON.parse(e.target.result);
+                    
+                    // Valida campos chave
+                    if (dadosImportados.services && dadosImportados.appointments && dadosImportados.clients) {
+                        db = dadosImportados;
+                        salvarBancoDados();
+                        mostrarToast("Backup importado com sucesso!", "success");
+                        
+                        // Atualiza a visualização para a tela de Agenda
+                        navegarAba('agenda', document.querySelector('.tab-nav-btn:first-child'));
+                    } else {
+                        mostrarToast("Arquivo inválido ou incompleto!", "error");
+                    }
+                } catch (err) {
+                    mostrarToast("Falha ao ler arquivo. Formato JSON inválido.", "error");
+                }
+            };
+            reader.readAsText(file);
+            event.target.value = ""; // Reseta o seletor de arquivos
+        }
+
+        function resetarBancoDados() {
+            if(confirm("ATENÇÃO: Isso irá apagar todos os dados cadastrados, incluindo clientes, atendimentos e preços. Deseja redefinir para a versão padrão de fábrica?")) {
+                localStorage.removeItem(DB_KEY);
+                inicializarBancoDados();
+                
+                // Reinicia na aba inicial
+                navegarAba('agenda', document.querySelector('.tab-nav-btn:first-child'));
+                mostrarToast("Sistema reiniciado!", "warning");
+            }
+        }
+
+        // =================================================================
+        // ONLOAD - INICIALIZAÇÃO GERAL DO APLICATIVO
+        // =================================================================
+        window.onload = function() {
+            inicializarBancoDados();
+            
+            // Renderiza dados do topo do cabeçalho
+            document.getElementById('header-salon-name').innerText = db.settings.salonName || "Bella Unhas";
+            const iniciais = (db.settings.salonName || "Bella Unhas").split(' ').map(n => n[0]).join('').substring(0,2).toUpperCase();
+            document.getElementById('header-avatar').innerText = iniciais;
+
+            // Inicializa componentes do calendário
+            renderizarDateSlider();
+            renderizarAgenda();
+        };
+    </script>
+</body>
+</html>

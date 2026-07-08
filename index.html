@@ -55,11 +55,10 @@
             padding: 20px 16px 90px 16px;
         }
 
-        /* TELA DE LOGIN CORRIGIDA PARA iPHONE */
         #view-login {
             position: fixed;
             top: 0; left: 0; width: 100%;
-            height: 100dvh; /* dvh corrige o bug da barra do Safari */
+            height: 100dvh;
             background: linear-gradient(135deg, var(--bg-cream) 0%, var(--bg-accent-soft) 100%);
             display: flex;
             align-items: center;
@@ -85,7 +84,6 @@
             color: #fff; font-weight: bold; font-size: 24px; margin: 0 auto 16px auto;
         }
 
-        /* LOADER */
         #global-loader {
             position: fixed; top: 0; left: 0; width: 100%; height: 100dvh;
             background: var(--bg-cream); display: flex; flex-direction: column; align-items: center; justify-content: center;
@@ -94,12 +92,10 @@
         .spinner { width: 40px; height: 40px; border: 4px solid var(--rose-gold-light); border-top: 4px solid var(--rose-gold); border-radius: 50%; animation: spin 1s linear infinite; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
-        /* GERAIS E TOASTS */
         #toast-container { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); z-index: 100000; width: 90%; max-width: 400px; display: flex; flex-direction: column; gap: 10px; pointer-events: none; }
         .toast { background: var(--bg-card); padding: 14px 20px; border-radius: 16px; box-shadow: var(--shadow-lg); font-weight: 600; font-size: 13px; color: var(--text-cocoa); transform: translateY(-20px); opacity: 0; transition: var(--transition); border-left: 5px solid var(--rose-gold); display: flex; align-items: center; gap: 10px; }
         .toast.show { transform: translateY(0); opacity: 1; }
         
-        /* TIPOGRAFIA E ESTRUTURA */
         header { margin-bottom: 24px; }
         .welcome-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
         .welcome-text h1 { font-family: var(--font-display); font-size: 26px; font-weight: 700; }
@@ -114,7 +110,6 @@
         .section-title-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
         .section-title { font-family: var(--font-display); font-size: 18px; font-weight: 700; }
 
-        /* NAVEGAÇÃO DE DATAS */
         .date-navigation { display: flex; align-items: center; gap: 8px; margin-bottom: 20px; background: var(--bg-card); padding: 8px; border-radius: 16px; border: 1px solid var(--border-soft); }
         .date-slider { display: flex; gap: 6px; overflow-x: auto; flex-grow: 1; scrollbar-width: none; }
         .date-slider::-webkit-scrollbar { display: none; }
@@ -127,7 +122,6 @@
         .calendar-picker-btn { width: 44px; height: 44px; border-radius: 12px; background: var(--bg-accent-soft); display: flex; align-items: center; justify-content: center; color: var(--rose-gold-dark); position: relative; }
         .calendar-picker-btn input { position: absolute; top: 0; left: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer; }
 
-        /* CARDS GERAIS (AGENDA, CLIENTE, SERVIÇO) */
         .apt-card, .client-card, .service-card, .package-card { background: var(--bg-card); border-radius: 20px; padding: 16px; border: 1px solid var(--border-soft); box-shadow: var(--shadow-sm); margin-bottom: 12px; position: relative; }
         .apt-top { display: flex; justify-content: space-between; align-items: center; }
         .apt-time { font-weight: 700; font-size: 15px; color: var(--rose-gold-dark); }
@@ -144,10 +138,8 @@
         .client-info-main h3 { font-size: 16px; font-weight: 700; }
         .client-info-main p { font-size: 12px; color: var(--text-muted); }
 
-        /* FORMULÁRIOS & MODAIS */
         .form-group { margin-bottom: 16px; }
         .form-group label { display: block; font-size: 11px; font-weight: 700; text-transform: uppercase; color: var(--text-muted); margin-bottom: 6px; }
-        /* CORREÇÃO iOS: Font-size 16px impede o zoom automático ao focar no input */
         .form-control { width: 100%; padding: 12px; border-radius: 12px; border: 1.5px solid var(--border-soft); background: var(--bg-cream); font-family: inherit; font-size: 16px; outline: none; }
         .form-control:focus { border-color: var(--rose-gold); background: var(--bg-card); }
         .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
@@ -159,7 +151,6 @@
         .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
         .modal-close-btn { background: var(--bg-accent-soft); border: none; width: 30px; height: 30px; border-radius: 50%; color: var(--rose-gold-dark); font-weight: bold; }
 
-        /* ELEMENTOS DE NAVEGAÇÃO */
         .fab-btn { position: fixed; bottom: 95px; right: 20px; width: 56px; height: 56px; border-radius: 50%; background: linear-gradient(135deg, var(--rose-gold) 0%, var(--rose-gold-dark) 100%); color: white; border: none; display: flex; align-items: center; justify-content: center; box-shadow: 0 8px 24px rgba(197, 139, 126, 0.4); z-index: 998; }
         .bottom-tabs-nav { position: fixed; bottom: 0; left: 0; width: 100%; height: 70px; background: var(--bg-card); border-top: 1px solid var(--border-soft); display: flex; justify-content: space-around; align-items: center; z-index: 999; padding-bottom: env(safe-area-inset-bottom); }
         .tab-nav-btn { display: flex; flex-direction: column; align-items: center; background: transparent; border: none; color: var(--text-muted); font-size: 10px; font-weight: 700; width: 60px; gap: 4px; }
@@ -170,7 +161,6 @@
         .app-page.active { display: block; animation: fadeIn 0.3s; }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
-        /* EXTRAS UI */
         .status-dropdown-menu { position: absolute; background: #fff; border: 1px solid var(--border-soft); border-radius: 12px; box-shadow: var(--shadow-sm); z-index: 100; top: 35px; right: 0; display: none; flex-direction: column; width: 110px; overflow: hidden; }
         .status-dropdown-menu.active { display: flex; }
         .status-dropdown-opt { padding: 10px 12px; font-size: 12px; font-weight: bold; cursor: pointer; border-bottom: 1px solid var(--border-soft);}
@@ -195,8 +185,10 @@
 
     <div id="toast-container"></div>
 
+    <!-- TELA DE LOGIN E CADASTRO -->
     <div id="view-login" style="display: none;">
         
+        <!-- CARTÃO DE LOGIN -->
         <div class="login-card" id="card-login">
             <div class="login-logo">BU</div>
             <h1 style="text-align:center; font-family:var(--font-display); font-size:24px; margin-bottom: 5px;">Agenda Beauty</h1>
@@ -220,6 +212,7 @@
             </p>
         </div>
 
+        <!-- CARTÃO DE CADASTRO -->
         <div class="login-card" id="card-cadastro" style="display: none;">
             <div class="login-logo">BU</div>
             <h1 style="text-align:center; font-family:var(--font-display); font-size:24px; margin-bottom: 5px;">Nova Conta</h1>
@@ -242,9 +235,9 @@
                 Já tem conta? <a href="#" onclick="alternarTelasAuth('login')" style="color: var(--rose-gold-dark); font-weight: bold; text-decoration: none;">Fazer login</a>
             </p>
         </div>
-
     </div>
 
+    <!-- RESTANTE DO APP -->
     <div id="view-app" style="display: none;">
         <div class="app-container">
             
@@ -347,7 +340,9 @@
                 </div>
             </div>
 
-        </div> <button class="fab-btn" onclick="abrirModalAgendamento()" id="agenda-fab">
+        </div> 
+        
+        <button class="fab-btn" onclick="abrirModalAgendamento()" id="agenda-fab">
             <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
         </button>
 
@@ -420,13 +415,29 @@
             </div>
         </div>
 
+        <!-- MODAL DE PACOTES ATUALIZADO -->
         <div class="modal-overlay" id="modal-pacote">
             <div class="modal-sheet">
                 <div class="modal-header"><h2 style="font-family:var(--font-display); font-size:20px;">Pacote</h2><button class="modal-close-btn" onclick="fecharModais()">×</button></div>
                 <form id="form-pacote" onsubmit="salvarPacote(event)">
                     <input type="hidden" id="form-pkt-id">
                     <div class="form-group"><label>Nome do Combo</label><input type="text" id="form-pkt-name" class="form-control" required></div>
-                    <div class="form-group"><label>Preço (R$)</label><input type="number" step="0.01" id="form-pkt-price" class="form-control" required></div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Frequência</label>
+                            <select id="form-pkt-frequency" class="form-control" required>
+                                <option value="15 em 15 dias">15 em 15 dias</option>
+                                <option value="Mês Inteiro">Mês Inteiro</option>
+                                <option value="Personalizado">Personalizado</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Preço (R$)</label>
+                            <input type="number" step="0.01" id="form-pkt-price" class="form-control" required>
+                        </div>
+                    </div>
+                    
                     <button type="submit" class="btn-submit" style="margin-top: 10px;">SALVAR PACOTE</button>
                 </form>
             </div>
@@ -452,12 +463,10 @@
         const auth = getAuth(app);
         const dbFirebase = getFirestore(app);
 
-        // Estado do App
         let db = { services: [], packages: [], clients: [], appointments: [], templates: {}, settings: {} };
         let currentUserUid = null;
         let dataFocoAtual = (new Date()).toISOString().split('T')[0];
 
-        // UTILITÁRIOS
         window.mostrarToast = function(msg, tipo = 'info') {
             const c = document.getElementById('toast-container');
             const t = document.createElement('div');
@@ -468,43 +477,31 @@
             setTimeout(() => { t.classList.remove('show'); setTimeout(() => t.remove(), 300); }, 3000);
         }
 
-        // --- NOVA FUNÇÃO PARA ALTERNAR ENTRE LOGIN E CADASTRO ---
         window.alternarTelasAuth = function(tela) {
             document.getElementById('card-login').style.display = tela === 'login' ? 'block' : 'none';
             document.getElementById('card-cadastro').style.display = tela === 'cadastro' ? 'block' : 'none';
         }
 
-        // AUTENTICAÇÃO E CADASTRO
         window.fazerLogin = async function(e) {
             e.preventDefault();
             const btn = document.getElementById('btn-login-submit');
             const err = document.getElementById('login-error');
             btn.innerText = "CARREGANDO..."; err.style.display = "none";
-            try {
-                await signInWithEmailAndPassword(auth, document.getElementById('login-email').value, document.getElementById('login-senha').value);
-            } catch (error) {
-                btn.innerText = "ENTRAR"; err.innerText = "E-mail ou senha incorretos."; err.style.display = "block";
-            }
+            try { await signInWithEmailAndPassword(auth, document.getElementById('login-email').value, document.getElementById('login-senha').value); }
+            catch (error) { btn.innerText = "ENTRAR"; err.innerText = "E-mail ou senha incorretos."; err.style.display = "block"; }
         }
 
-        // --- NOVA FUNÇÃO DE CRIAR CONTA ---
         window.fazerCadastro = async function(e) {
             e.preventDefault();
             const btn = document.getElementById('btn-cadastro-submit');
             const err = document.getElementById('cadastro-error');
             btn.innerText = "CRIANDO..."; err.style.display = "none";
-            try {
-                await createUserWithEmailAndPassword(auth, document.getElementById('cadastro-email').value, document.getElementById('cadastro-senha').value);
-                // Quando der certo, o onAuthStateChanged (logo abaixo) detecta sozinho e já abre o app!
-            } catch (error) {
+            try { await createUserWithEmailAndPassword(auth, document.getElementById('cadastro-email').value, document.getElementById('cadastro-senha').value); } 
+            catch (error) {
                 btn.innerText = "CRIAR MINHA CONTA"; 
-                if (error.code === 'auth/email-already-in-use') {
-                    err.innerText = "Erro: Este e-mail já está sendo usado.";
-                } else if (error.code === 'auth/weak-password') {
-                    err.innerText = "Erro: A senha precisa ter pelo menos 6 caracteres.";
-                } else {
-                    err.innerText = "Erro ao criar conta: " + error.message;
-                }
+                if (error.code === 'auth/email-already-in-use') err.innerText = "Erro: Este e-mail já está sendo usado.";
+                else if (error.code === 'auth/weak-password') err.innerText = "Erro: A senha precisa ter pelo menos 6 caracteres.";
+                else err.innerText = "Erro ao criar conta: " + error.message;
                 err.style.display = "block";
             }
         }
@@ -525,14 +522,12 @@
                 currentUserUid = null;
                 document.getElementById('view-app').style.display = 'none';
                 document.getElementById('view-login').style.display = 'flex';
-                // Garante que ao deslogar sempre volte pra aba de login
                 window.alternarTelasAuth('login');
             }
             loader.style.opacity = '0';
             setTimeout(() => loader.style.display = 'none', 400);
         });
 
-        // BANCO DE DADOS
         async function buscarDadosIniciais() {
             try {
                 const confSnap = await getDoc(doc(dbFirebase, "users", currentUserUid, "config", "geral"));
@@ -562,7 +557,6 @@
         window.deletarItemDb = async function(colecao, id) { await deleteDoc(doc(dbFirebase, "users", currentUserUid, colecao, id)); }
         window.salvarConfig = async function() { await setDoc(doc(dbFirebase, "users", currentUserUid, "config", "geral"), { settings: db.settings, templates: db.templates }); }
 
-        // NAVEGAÇÃO E UI
         window.navegarAba = function(abaId, btnElement) {
             document.querySelectorAll('.app-page').forEach(p => p.classList.remove('active'));
             document.querySelectorAll('.tab-nav-btn').forEach(b => b.classList.remove('active'));
@@ -707,7 +701,9 @@
             const id = document.getElementById('form-apt-item-id').value;
             if(document.getElementById('form-apt-item-type').value === 'service') {
                 document.getElementById('form-apt-price').value = db.services.find(s=>s.id===id)?.price || 0;
-            } else document.getElementById('form-apt-price').value = 0;
+            } else {
+                document.getElementById('form-apt-price').value = db.packages.find(p=>p.id===id)?.price || 0;
+            }
         }
 
         window.salvarAgendamento = function(e) {
@@ -727,7 +723,7 @@
             dataFocoAtual = apt.date; window.renderizarDateSlider(); window.renderizarAgenda(); window.mostrarToast("Horário salvo!", "success");
         }
 
-        window.excluirAgendamento = function(id) { if(confirm("Excluir?")) { db.appointments = db.appointments.filter(a=>a.id!==id); window.deletarItemDb('appointments', id); window.renderizarAgenda(); } }
+        window.excluirAgendamento = function(id) { if(confirm("Excluir agendamento?")) { db.appointments = db.appointments.filter(a=>a.id!==id); window.deletarItemDb('appointments', id); window.renderizarAgenda(); } }
 
         // CLIENTES
         window.abrirModalCliente = function() { document.getElementById('form-cliente').reset(); document.getElementById('form-cli-id').value=""; document.getElementById('modal-cliente').classList.add('active'); }
@@ -748,24 +744,29 @@
             document.getElementById('clientes-render-list').innerHTML = filt.map(c => `<div class="client-card"><div class="client-header"><div class="client-info-main"><h3>${c.name}</h3><p>📱 ${c.phone}</p></div><div style="display:flex;gap:8px;"><button class="action-btn" onclick="abrirEditarCliente('${c.id}')">✏️</button><button class="action-btn" onclick="excluirCliente('${c.id}')">🗑️</button></div></div></div>`).join('');
         }
 
-        // SERVIÇOS & PACOTES
+        // SERVIÇOS
         window.abrirModalServico = function() { document.getElementById('form-servico').reset(); document.getElementById('form-srv-id').value=""; document.getElementById('modal-servico').classList.add('active'); }
+        window.abrirEditarServico = function(id) { const s = db.services.find(s=>s.id===id); document.getElementById('form-srv-id').value=s.id; document.getElementById('form-srv-name').value=s.name; document.getElementById('form-srv-price').value=s.price; document.getElementById('form-srv-duration').value=s.duration; document.getElementById('modal-servico').classList.add('active'); }
         window.salvarServico = function(e) {
             e.preventDefault(); const id = document.getElementById('form-srv-id').value || 's_'+Date.now();
             const s = { id: id, name: document.getElementById('form-srv-name').value, price: Number(document.getElementById('form-srv-price').value), duration: document.getElementById('form-srv-duration').value };
             if(document.getElementById('form-srv-id').value) db.services[db.services.findIndex(x=>x.id===id)] = s; else db.services.push(s);
             window.salvarItemDb('services', id, s); window.fecharModais(); window.renderizarServicos(); window.mostrarToast("Serviço salvo!");
         }
-        window.renderizarServicos = function() { document.getElementById('servicos-render-list').innerHTML = db.services.map(s => `<div class="service-card" style="display:flex; justify-content:space-between;"><div><h4>${s.name}</h4><span style="font-size:12px;color:var(--text-muted);">⏱ ${s.duration} min</span></div><h4 style="color:var(--rose-gold-dark);">R$ ${s.price.toFixed(2)}</h4></div>`).join(''); }
+        window.excluirServico = function(id) { if(confirm("Excluir serviço?")) { db.services = db.services.filter(s=>s.id!==id); window.deletarItemDb('services', id); window.renderizarServicos(); } }
+        window.renderizarServicos = function() { document.getElementById('servicos-render-list').innerHTML = db.services.map(s => `<div class="service-card" style="display:flex; justify-content:space-between; align-items:center;"><div><h4 style="font-size:15px; margin-bottom:4px;">${s.name}</h4><span style="font-size:12px;color:var(--text-muted);">⏱ ${s.duration} min</span></div><div style="display:flex; align-items:center; gap:8px;"><h4 style="color:var(--rose-gold-dark); margin-right:8px;">R$ ${s.price.toFixed(2)}</h4><button class="action-btn" onclick="abrirEditarServico('${s.id}')">✏️</button><button class="action-btn" onclick="excluirServico('${s.id}')">🗑️</button></div></div>`).join(''); }
 
-        window.abrirModalPacote = function() { document.getElementById('form-pacote').reset(); document.getElementById('form-pkt-id').value=""; document.getElementById('modal-pacote').classList.add('active'); }
+        // PACOTES
+        window.abrirModalPacote = function() { document.getElementById('form-pacote').reset(); document.getElementById('form-pkt-id').value=""; document.getElementById('form-pkt-frequency').value="15 em 15 dias"; document.getElementById('modal-pacote').classList.add('active'); }
+        window.abrirEditarPacote = function(id) { const p = db.packages.find(p=>p.id===id); document.getElementById('form-pkt-id').value=p.id; document.getElementById('form-pkt-name').value=p.name; document.getElementById('form-pkt-price').value=p.price; document.getElementById('form-pkt-frequency').value=p.frequency || '15 em 15 dias'; document.getElementById('modal-pacote').classList.add('active'); }
         window.salvarPacote = function(e) {
             e.preventDefault(); const id = document.getElementById('form-pkt-id').value || 'p_'+Date.now();
-            const p = { id: id, name: document.getElementById('form-pkt-name').value, price: Number(document.getElementById('form-pkt-price').value) };
+            const p = { id: id, name: document.getElementById('form-pkt-name').value, price: Number(document.getElementById('form-pkt-price').value), frequency: document.getElementById('form-pkt-frequency').value };
             if(document.getElementById('form-pkt-id').value) db.packages[db.packages.findIndex(x=>x.id===id)] = p; else db.packages.push(p);
             window.salvarItemDb('packages', id, p); window.fecharModais(); window.renderizarPacotes(); window.mostrarToast("Pacote salvo!");
         }
-        window.renderizarPacotes = function() { document.getElementById('pacotes-render-list').innerHTML = db.packages.map(p => `<div class="package-card" style="display:flex; justify-content:space-between;"><h4>${p.name}</h4><h4 style="color:var(--rose-gold-dark);">R$ ${p.price.toFixed(2)}</h4></div>`).join(''); }
+        window.excluirPacote = function(id) { if(confirm("Excluir pacote?")) { db.packages = db.packages.filter(p=>p.id!==id); window.deletarItemDb('packages', id); window.renderizarPacotes(); } }
+        window.renderizarPacotes = function() { document.getElementById('pacotes-render-list').innerHTML = db.packages.map(p => `<div class="package-card" style="display:flex; justify-content:space-between; align-items:center;"><div><h4 style="font-size:15px; margin-bottom:4px;">${p.name}</h4><span class="tag-pill">${p.frequency || '15 em 15 dias'}</span></div><div style="display:flex; align-items:center; gap:8px;"><h4 style="color:var(--rose-gold-dark); margin-right:8px;">R$ ${p.price.toFixed(2)}</h4><button class="action-btn" onclick="abrirEditarPacote('${p.id}')">✏️</button><button class="action-btn" onclick="excluirPacote('${p.id}')">🗑️</button></div></div>`).join(''); }
 
         // MENSAGENS / WPP
         window.inserirTag = function(id, tag) { const t = document.getElementById(id); const start = t.selectionStart; const end = t.selectionEnd; t.value = t.value.substring(0, start) + tag + t.value.substring(end); t.focus(); window.salvarTemplates(); }
@@ -785,7 +786,6 @@
             let fone = cli.phone.length <= 11 ? '55' + cli.phone : cli.phone;
             window.open(`https://api.whatsapp.com/send?phone=${fone}&text=${encodeURIComponent(txt)}`, '_blank');
         }
-
     </script>
 </body>
 </html>

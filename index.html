@@ -196,7 +196,8 @@
     <div id="toast-container"></div>
 
     <div id="view-login" style="display: none;">
-        <div class="login-card">
+        
+        <div class="login-card" id="card-login">
             <div class="login-logo">BU</div>
             <h1 style="text-align:center; font-family:var(--font-display); font-size:24px; margin-bottom: 5px;">Agenda Beauty</h1>
             <p style="text-align:center; font-size:13px; color:var(--text-muted); margin-bottom:24px;">Faça login para gerenciar.</p>
@@ -213,7 +214,35 @@
                 <button type="submit" class="btn-submit" id="btn-login-submit" style="margin-top:10px;">ENTRAR</button>
             </form>
             <div id="login-error" style="color:var(--status-cancelado-txt); font-size:12px; text-align:center; margin-top:12px; display:none;"></div>
+            
+            <p style="text-align: center; font-size: 13px; margin-top: 15px;">
+                Não tem conta? <a href="#" onclick="alternarTelasAuth('cadastro')" style="color: var(--rose-gold-dark); font-weight: bold; text-decoration: none;">Criar conta</a>
+            </p>
         </div>
+
+        <div class="login-card" id="card-cadastro" style="display: none;">
+            <div class="login-logo">BU</div>
+            <h1 style="text-align:center; font-family:var(--font-display); font-size:24px; margin-bottom: 5px;">Nova Conta</h1>
+            <p style="text-align:center; font-size:13px; color:var(--text-muted); margin-bottom:24px;">Cadastre-se para usar a agenda.</p>
+            
+            <form id="form-cadastro" onsubmit="fazerCadastro(event)">
+                <div class="form-group">
+                    <label>E-mail</label>
+                    <input type="email" id="cadastro-email" class="form-control" placeholder="seu@email.com" required>
+                </div>
+                <div class="form-group">
+                    <label>Senha</label>
+                    <input type="password" id="cadastro-senha" class="form-control" placeholder="Mínimo 6 caracteres" required>
+                </div>
+                <button type="submit" class="btn-submit" id="btn-cadastro-submit" style="margin-top:10px;">CRIAR MINHA CONTA</button>
+            </form>
+            <div id="cadastro-error" style="color:var(--status-cancelado-txt); font-size:12px; text-align:center; margin-top:12px; display:none;"></div>
+            
+            <p style="text-align: center; font-size: 13px; margin-top: 15px;">
+                Já tem conta? <a href="#" onclick="alternarTelasAuth('login')" style="color: var(--rose-gold-dark); font-weight: bold; text-decoration: none;">Fazer login</a>
+            </p>
+        </div>
+
     </div>
 
     <div id="view-app" style="display: none;">
@@ -406,7 +435,7 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
-        import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
+        import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
         import { getFirestore, doc, setDoc, getDocs, collection, deleteDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
 
         const firebaseConfig = {
@@ -439,7 +468,13 @@
             setTimeout(() => { t.classList.remove('show'); setTimeout(() => t.remove(), 300); }, 3000);
         }
 
-        // AUTENTICAÇÃO
+        // --- NOVA FUNÇÃO PARA ALTERNAR ENTRE LOGIN E CADASTRO ---
+        window.alternarTelasAuth = function(tela) {
+            document.getElementById('card-login').style.display = tela === 'login' ? 'block' : 'none';
+            document.getElementById('card-cadastro').style.display = tela === 'cadastro' ? 'block' : 'none';
+        }
+
+        // AUTENTICAÇÃO E CADASTRO
         window.fazerLogin = async function(e) {
             e.preventDefault();
             const btn = document.getElementById('btn-login-submit');
@@ -449,6 +484,28 @@
                 await signInWithEmailAndPassword(auth, document.getElementById('login-email').value, document.getElementById('login-senha').value);
             } catch (error) {
                 btn.innerText = "ENTRAR"; err.innerText = "E-mail ou senha incorretos."; err.style.display = "block";
+            }
+        }
+
+        // --- NOVA FUNÇÃO DE CRIAR CONTA ---
+        window.fazerCadastro = async function(e) {
+            e.preventDefault();
+            const btn = document.getElementById('btn-cadastro-submit');
+            const err = document.getElementById('cadastro-error');
+            btn.innerText = "CRIANDO..."; err.style.display = "none";
+            try {
+                await createUserWithEmailAndPassword(auth, document.getElementById('cadastro-email').value, document.getElementById('cadastro-senha').value);
+                // Quando der certo, o onAuthStateChanged (logo abaixo) detecta sozinho e já abre o app!
+            } catch (error) {
+                btn.innerText = "CRIAR MINHA CONTA"; 
+                if (error.code === 'auth/email-already-in-use') {
+                    err.innerText = "Erro: Este e-mail já está sendo usado.";
+                } else if (error.code === 'auth/weak-password') {
+                    err.innerText = "Erro: A senha precisa ter pelo menos 6 caracteres.";
+                } else {
+                    err.innerText = "Erro ao criar conta: " + error.message;
+                }
+                err.style.display = "block";
             }
         }
 
@@ -468,6 +525,8 @@
                 currentUserUid = null;
                 document.getElementById('view-app').style.display = 'none';
                 document.getElementById('view-login').style.display = 'flex';
+                // Garante que ao deslogar sempre volte pra aba de login
+                window.alternarTelasAuth('login');
             }
             loader.style.opacity = '0';
             setTimeout(() => loader.style.display = 'none', 400);
@@ -478,10 +537,10 @@
             try {
                 const confSnap = await getDoc(doc(dbFirebase, "users", currentUserUid, "config", "geral"));
                 if (confSnap.exists()) {
-                    db.settings = confSnap.data().settings || { salonName: "Bella Unhas" };
+                    db.settings = confSnap.data().settings || { salonName: "Meu Espaço" };
                     db.templates = confSnap.data().templates || { confirm: "", thanks: "" };
                 } else {
-                    db.settings = { salonName: "Bella Unhas" };
+                    db.settings = { salonName: "Meu Espaço" };
                     db.templates = { confirm: "Olá {cliente}! Confirmando seu {servico} dia {data} às {hora}. Bjs!", thanks: "Obrigada {cliente}!" };
                     await window.salvarConfig();
                 }
